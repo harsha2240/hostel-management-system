@@ -1,5 +1,11 @@
 # HMS end-to-end audit tracker
 
+> Historical audit record from 28–29 October 2026. Checkout paths, commands,
+> test totals and publication restrictions below describe that audit session.
+> Its application fixes were subsequently merged in PR #35. For current setup
+> and verification, use [README](../README.md), the final commit's CI artifacts
+> and the [submission checklist](../docs/SUBMISSION_CHECKLIST.md).
+
 ## Purpose and resume point
 
 Audit the merged HMS application feature by feature. Reproduce defects in a disposable environment, fix them in this isolated checkout, add regression coverage, and keep this file current so another turn can resume without losing completed work.

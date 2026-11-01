@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600" role="img" aria-labelledby="title desc">
 <title id="title">HMS sprint burndown</title>
-<desc id="desc">Sprint 1 reached zero remaining story points. Sprint 2 reached zero on 29 October after a populated backup restore and a 50-user performance run. HMS-14 is an unestimated follow-up outside the original sprint baseline.</desc>
+<desc id="desc">Sprint 1 reached zero remaining story points on 23 October. The original Sprint 2 backlog reached zero on 28 October, using merged PRs as an acceptance proxy. HMS-13 has acceptance evidence gaps recorded in the submission checklist. HMS-14 is an unestimated follow-up outside the original baseline. The 30 October daily actual was not recorded.</desc>
 <rect width="1000" height="600" fill="#fff"/>
 <text x="50" y="42" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#182230">HMS sprint burndown</text>
 <text x="50" y="68" font-family="Arial,sans-serif" font-size="13" fill="#596579">Story points remaining · reconstructed from sprint backlog and merged work · snapshot 29 October 2026</text>
 <line x1="650" y1="42" x2="684" y2="42" stroke="#8792a2" stroke-width="3" stroke-dasharray="7 5"/><text x="692" y="47" font-family="Arial,sans-serif" font-size="13" fill="#344054">Ideal</text>
-<line x1="755" y1="42" x2="789" y2="42" stroke="#087e8b" stroke-width="3"/><circle cx="772" cy="42" r="4" fill="#087e8b"/><text x="798" y="47" font-family="Arial,sans-serif" font-size="13" fill="#344054">Actual accepted work</text>
+<line x1="755" y1="42" x2="789" y2="42" stroke="#087e8b" stroke-width="3"/><circle cx="772" cy="42" r="4" fill="#087e8b"/><text x="798" y="47" font-family="Arial,sans-serif" font-size="13" fill="#344054">Actual (merged PR proxy)</text>
 <text x="70" y="112" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#253247">Sprint 1 · 29 SP · 19–23 Oct</text>
 <text x="530" y="112" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#253247">Sprint 2 · 24 SP · 26–30 Oct</text>
 <g stroke="#e7ebf0"><path d="M82 150H430 M82 190H430 M82 230H430 M82 270H430 M82 310H430 M82 350H430 M542 150H890 M542 190H890 M542 230H890 M542 270H890 M542 310H890 M542 350H890"/></g>
@@ -15,14 +15,14 @@
 <polyline points="82,156.7 151.6,156.7 221.2,243.3 290.8,263.3 360.4,263.3 430,350" fill="none" stroke="#087e8b" stroke-width="3"/>
 <g fill="#087e8b"><circle cx="82" cy="156.7" r="4"/><circle cx="151.6" cy="156.7" r="4"/><circle cx="221.2" cy="243.3" r="4"/><circle cx="290.8" cy="263.3" r="4"/><circle cx="360.4" cy="263.3" r="4"/><circle cx="430" cy="350" r="4"/></g>
 <polyline points="542,150 611.6,190 681.2,230 750.8,270 820.4,310 890,350" fill="none" stroke="#8792a2" stroke-width="3" stroke-dasharray="7 5"/>
-<polyline points="542,150 611.6,258.3 681.2,308.3 750.8,308.3 820.4,350" fill="none" stroke="#087e8b" stroke-width="3"/>
-<g fill="#087e8b"><circle cx="542" cy="150" r="4"/><circle cx="611.6" cy="258.3" r="4"/><circle cx="681.2" cy="308.3" r="4"/><circle cx="750.8" cy="308.3" r="4"/><circle cx="820.4" cy="350" r="4"/></g>
+<polyline points="542,150 611.6,258.3 681.2,308.3 750.8,350 820.4,350" fill="none" stroke="#087e8b" stroke-width="3"/>
+<g fill="#087e8b"><circle cx="542" cy="150" r="4"/><circle cx="611.6" cy="258.3" r="4"/><circle cx="681.2" cy="308.3" r="4"/><circle cx="750.8" cy="350" r="4"/><circle cx="820.4" cy="350" r="4"/></g>
 <g font-family="Arial,sans-serif" font-size="11" fill="#667085" text-anchor="middle"><text x="82" y="374">Start</text><text x="151.6" y="374">Oct 19</text><text x="221.2" y="374">Oct 20</text><text x="290.8" y="374">Oct 21</text><text x="360.4" y="374">Oct 22</text><text x="430" y="374">Oct 23</text><text x="542" y="374">Start</text><text x="611.6" y="374">Oct 26</text><text x="681.2" y="374">Oct 27</text><text x="750.8" y="374">Oct 28</text><text x="820.4" y="374">Oct 29</text><text x="890" y="374">Oct 30*</text></g>
 <text x="70" y="418" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#344054">Sprint 1 closed at 0 remaining</text>
-<text x="542" y="418" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#b54708">Sprint 2 at 0 after acceptance evidence</text>
+<text x="542" y="418" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#344054">Sprint 2 baseline closed by 28 Oct</text>
 <text x="50" y="460" font-family="Arial,sans-serif" font-size="12" fill="#344054">Sprint 1: #1–#4 merged Oct 20; #5 merged Oct 21; #6, #7 and #10 merged Oct 23.</text>
 <text x="50" y="483" font-family="Arial,sans-serif" font-size="12" fill="#344054">Sprint 2: #8–#9 merged Oct 26; #11–#12 merged Oct 27; #13 was closed Oct 28.</text>
-<text x="50" y="516" font-family="Arial,sans-serif" font-size="12" fill="#667085">HMS-13 follow-up complete Oct 29: populated backup restored and all 18 table row counts matched.</text>
-<text x="50" y="540" font-family="Arial,sans-serif" font-size="12" fill="#667085">The 50-user, 10-minute post-fix load had zero failures and a 738 ms aggregate p95. HMS-14 is outside the original baseline.</text>
-<text x="50" y="568" font-family="Arial,sans-serif" font-size="12" fill="#667085">* Oct 30 is the planned sprint end; its actual is blank because this chart is a 29 Oct snapshot.</text>
+<text x="50" y="516" font-family="Arial,sans-serif" font-size="12" fill="#667085">HMS-13 closed after PR #33 merged; its review records acceptance evidence gaps. See the submission checklist.</text>
+<text x="50" y="540" font-family="Arial,sans-serif" font-size="12" fill="#667085">HMS-14 is an unestimated follow-up outside the original 24 SP baseline.</text>
+<text x="50" y="568" font-family="Arial,sans-serif" font-size="12" fill="#667085">* Oct 30 daily actual was not recorded in the source snapshot.</text>
 </svg>

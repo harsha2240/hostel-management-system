@@ -1,6 +1,6 @@
 # Sprint 2 implementation and verification
 
-Sprint 2 runs from 26 to 30 October 2026. Devansh owns #8 allocations, #9
+Sprint 2 was planned for 26 to 30 October 2026. Devansh owns #8 allocations, #9
 payments/receipts and #11 reports. Work builds on the accepted student/hostel
 implementation in PRs #22–#24. Earlier drafts #19–#21 were closed and are not
 the integration base.
@@ -44,8 +44,8 @@ exercise transfers/history, role access, CSRF, rollback, audit failure,
 database checks, upgrade/backfill behavior, competing allocation requests,
 deactivation races and simultaneous transfers between rooms.
 
-The full MySQL suite passed 110 tests after the allocation implementation.
-Payment/report results are recorded below as those implementations are verified.
+The allocation implementation checkpoint passed 110 tests on MySQL. This is a
+historical total; use the current run artifacts for the complete suite.
 
 ## HMS-09: payments (REQ-20–REQ-22, BR-5)
 
@@ -99,7 +99,8 @@ recorded payment amounts.
 
 Install `requirements-dev.txt` to run the verification suite (including pypdf
 receipt parsing). Runtime deployments need only `requirements.txt`.
-`python manage.py test payments hostels --noinput` passed 44 tests on MySQL
+The payment implementation checkpoint, `python manage.py test payments hostels
+--noinput`, passed 44 tests on MySQL
 8.4.9, including concurrent numbering/corrections, rollback, immutable history,
 balance transitions, permissions, CSRF, validation and actual PDF contents.
 
@@ -130,7 +131,8 @@ CSV output uses UTF-8 with a BOM, quotes commas/newlines correctly, and prefixes
 spreadsheet formula-like names with an apostrophe so they remain literal text.
 HTML escapes names normally. Both reports are read-only and staff-only.
 
-`python manage.py test reports --noinput` passed all ten current report tests, covering
+The reports implementation checkpoint, `python manage.py test reports --noinput`,
+passed ten tests, covering
 calculations, history, stale flags, maintenance, empty hostels, filters, payment
 corrections, HTML/JSON/CSV agreement, CSV text handling, access and query counts.
 
@@ -139,8 +141,10 @@ corrections, HTML/JSON/CSV agreement, CSV text handling, access and query counts
 With the MySQL application/test database grants described in the README and
 `requirements-dev.txt` installed, run `python scripts/run_checks.py`. Do not run
 two suites against the same MySQL test database at once. The runner checks
-Python errors/import order with Ruff, Django/database configuration and migration
-consistency, creates a separate fresh test database, runs all tests under
+Python errors, imports, bug patterns, syntax and formatting with Ruff, installed
+dependency consistency, Django/database configuration, applied migrations,
+model/migration consistency and static-file collection in dry-run mode. It
+creates a separate fresh test database and runs all tests under
 branch-aware coverage, enforces a 70% combined statement/branch coverage minimum,
 and saves JUnit XML, logs, coverage XML/JSON and `run.json` in an ignored
 timestamped `test-results/` directory.

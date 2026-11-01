@@ -1,4 +1,4 @@
-Issue #13 — Test Evidence
+Issue #13 â€” Test Evidence
 Date: 2026-10-26
 
 Baseline full Django test suite: 103 tests passed.

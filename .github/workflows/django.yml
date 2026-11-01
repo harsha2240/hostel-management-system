@@ -81,7 +81,7 @@ jobs:
       - name: Apply migrations to a fresh application database
         run: python manage.py migrate --noinput
 
-      - name: Check configuration, migrations, tests and branch coverage
+      - name: Check lint, configuration, migrations, tests and branch coverage
         run: python scripts/run_checks.py --output-dir test-results/ci
 
       - name: Save test evidence

@@ -139,10 +139,14 @@ corrections, HTML/JSON/CSV agreement, CSV text handling, access and query counts
 With the MySQL application/test database grants described in the README and
 `requirements-dev.txt` installed, run `python scripts/run_checks.py`. Do not run
 two suites against the same MySQL test database at once. The runner checks
-Django/database configuration and migration consistency, creates a separate
-fresh test database, runs all tests under branch-aware coverage, enforces a 70%
-combined statement/branch coverage minimum, and saves JUnit XML, logs, coverage
-XML/JSON and `run.json` in an ignored timestamped `test-results/` directory.
+Python errors/import order with Ruff, Django/database configuration and migration
+consistency, creates a separate fresh test database, runs all tests under
+branch-aware coverage, enforces a 70% combined statement/branch coverage minimum,
+and saves JUnit XML, logs, coverage XML/JSON and `run.json` in an ignored
+timestamped `test-results/` directory.
+The login/dashboard timing check is intentionally skipped under coverage and
+then run separately without instrumentation. Its result is saved in
+`timing-smoke.txt` and included in the runner's overall success status.
 It never migrates or populates the application database. `run.json` records the
 commit, dirty status, versions, test totals, coverage and each check's exit code;
 it records no credentials or connection settings.
@@ -154,9 +158,9 @@ Open the corresponding PR check to download the complete evidence. This covers
 automated module/integration verification; broader Sprint 2 acceptance,
 browser/OS compatibility, backup/recovery drills and team sign-off remain #13.
 
-Merge order: allocation PR #25, then payment PR #26, then reports. Dependent PRs
-are stacked for focused review and should be retargeted to main after their
-parent merges. Issues close on merge, not on opening a PR.
+Allocation PR #25, payment PR #26 and reports PR #27 were merged in dependency
+order. Their original stacked bases were retargeted to main after each parent
+merged.
 
 Historical combined local checkpoint (revision `d9406ef`): 136 tests passed
 with zero failures, errors or skips on Python 3.14.7 / MySQL 8.4.9. Coverage
@@ -164,14 +168,15 @@ was 92.02% of statements, 77.93% of branches, and 89.27% combined, above the
 70% gate; 19 JUnit files and machine-readable coverage/run metadata were saved.
 The newer merged base revision `5f0cd5f` passed GitHub Actions run #27 using the
 MySQL 8.4 workflow matrix on Python 3.11 and 3.14. Its exact totals and coverage
-are in that run's artifacts. The current end-to-end audit has a 153/153 uninstrumented local SQLite pass
+are in that run's artifacts. The earlier end-to-end audit recorded a 153/153 uninstrumented local SQLite pass
 (9 MySQL-specific tests excluded). A separate coverage run reports 91.85%
 combined branch-aware coverage against the 70% gate (152 passed; one timing
 smoke skipped because coverage instrumentation distorts wall-clock measurement).
-The audit fixes are uncommitted and still need a CI run after publication.
+Those audit fixes were subsequently merged in PR #35. Use the current workflow
+run's artifacts for verification of the final revision.
 
 ## Submission snapshot — 29 October 2026
 
 Repository history shows #8 and #9 merged on 26 October and #11 and #12 merged on 27 October. The project board/issue shows HMS-13 Done/closed after PR #33 merged on 28 October, so the original 24-point Sprint 2 scope reaches zero on that date in the merge-based burndown. PR #33 review nevertheless recorded partial acceptance and explicitly requested further recovery/performance evidence; the later audit has a populated restore and 50-user run, but the target was exceeded and the post-pagination comparison remains open. HMS-14 (#32) was created on 27 October without a story-point estimate or Sprint field; keep it separate from the original baseline unless the team records an explicit scope change. See `BURNDOWN.md` and `BURNDOWN_DATA.csv` for the source and method.
 
-The latest local audit run after bed-list pagination passed 154 tests, with nine MySQL-specific tests excluded by the SQLite-compatible runner. Earlier MySQL 8.4 CI passed on Python 3.11 and 3.14, but that run predates pagination. Run fresh CI on the final submission commit. Load, backup, ZAP, TLS and browser-walkthrough status is tracked in `SUBMISSION_CHECKLIST.md` and `../test-evidence/E2E_AUDIT_LOG.md`.
+At this 29 October checkpoint, the local audit run after bed-list pagination passed 154 tests, with nine MySQL-specific tests excluded by the SQLite-compatible runner. The MySQL 8.4 CI run referenced at that checkpoint predates pagination. Run fresh CI on the final submission commit. Load, backup, ZAP, TLS and browser-walkthrough status is tracked in `SUBMISSION_CHECKLIST.md` and `../test-evidence/E2E_AUDIT_LOG.md`.

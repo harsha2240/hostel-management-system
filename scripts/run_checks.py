@@ -42,6 +42,8 @@ def main():
         )
     output.mkdir(parents=True, exist_ok=True)
     environment = os.environ.copy()
+    # Coverage sets this only in its child; the timing check must run normally.
+    environment.pop("COVERAGE_RUN", None)
     environment.update(
         {
             "PYTHONUNBUFFERED": "1",
@@ -65,6 +67,7 @@ def main():
                 "pypdf",
                 "coverage",
                 "unittest-xml-reporting",
+                "ruff",
             )
         },
         "steps": [],
@@ -100,6 +103,7 @@ def main():
         return code
 
     try:
+        run("lint", ["-m", "ruff", "check", "."])
         # Record only the server version, never connection settings or secrets.
         sys.path.insert(0, str(ROOT))
         os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hms.settings")
@@ -148,6 +152,15 @@ def main():
             "coverage-json",
             ["-m", "coverage", "json", "-o", str(output / "coverage.json")],
         )
+        run(
+            "timing-smoke",
+            [
+                "manage.py",
+                "test",
+                "accounts.tests.AuthenticationTests.test_login_and_role_dashboard_respond_within_two_seconds",
+                "--noinput",
+            ],
+        )
         if (output / "coverage.json").exists():
             evidence["coverage"] = json.loads(
                 (output / "coverage.json").read_text(encoding="utf-8")
@@ -162,7 +175,7 @@ def main():
     finally:
         evidence["completed_at"] = datetime.now(timezone.utc).isoformat()
         evidence["success"] = (
-            len(evidence["steps"]) == 6
+            len(evidence["steps"]) == 8
             and evidence.get("tests", {}).get("tests", 0) > 0
             and "setup_error_type" not in evidence
             and all(step["exit_code"] == 0 for step in evidence["steps"])

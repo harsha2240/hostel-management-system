@@ -68,10 +68,14 @@ python manage.py runserver
 
 The site runs at http://127.0.0.1:8000/ and the Django admin at http://127.0.0.1:8000/admin/. Run the tests with `python manage.py test`. The Sprint 1 test scope and saved CI evidence are described in [`docs/SPRINT1_TESTING.md`](docs/SPRINT1_TESTING.md).
 
-Run `python scripts/run_checks.py` for configuration/migration checks, the full
-suite, branch coverage and saved JUnit/coverage/run evidence. GitHub Actions
+Run `python scripts/run_checks.py` for lint, configuration/migration checks, the full
+suite, branch coverage, a separate timing smoke check without coverage, and saved
+JUnit/coverage/run evidence. GitHub Actions
 runs the same checks on Python 3.11/3.14 with MySQL 8.4; see
 [`docs/SPRINT2.md`](docs/SPRINT2.md) for scope, API routes and interpretation.
+
+Run `python -m ruff check .` for a quick check of Python errors and import order.
+The repository's `ruff.toml` excludes generated migrations from lint cleanup.
 
 The Sprint 2 allocation and payment workflows, migration notes and API examples
 are documented in [`docs/SPRINT2.md`](docs/SPRINT2.md). Issue acceptance and merge

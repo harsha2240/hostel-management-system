@@ -12,32 +12,42 @@
   <header class="site-header">
     <a class="brand" href="{% url 'dashboard' %}">HMS <span>Hostel Management System</span></a>
     {% if request.user.is_authenticated %}
-    <nav aria-label="Main navigation">
-      <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>Dashboard</a>
-      {% if request.user.role == 'student' %}<a href="{% url 'student-self-service' %}" {% if request.resolver_match.url_name == 'student-self-service' %}aria-current="page"{% endif %}>My records</a>{% endif %}
-      {% if request.user.role == 'admin' or request.user.role == 'warden' %}
-      <a href="{% url 'student-list' %}" {% if request.resolver_match.url_name == 'student-list' or request.resolver_match.url_name == 'student-create' or request.resolver_match.url_name == 'student-update' %}aria-current="page"{% endif %}>Students</a>
-      <a href="{% url 'allocation-list' %}" {% if request.resolver_match.url_name == 'allocation-list' or request.resolver_match.url_name == 'allocation-create' %}aria-current="page"{% endif %}>Allocations</a>
-      <a href="{% url 'payment-list' %}" {% if request.resolver_match.url_name == 'payment-list' or request.resolver_match.url_name == 'payment-create' or request.resolver_match.url_name == 'payment-receipt' or request.resolver_match.url_name == 'payment-adjust' or request.resolver_match.url_name == 'student-payment-status' %}aria-current="page"{% endif %}>Payments</a>
-      <a href="{% url 'occupancy-report' %}" {% if request.resolver_match.url_name == 'occupancy-report' or request.resolver_match.url_name == 'payment-status-report' %}aria-current="page"{% endif %}>Reports</a>
-      {% endif %}
-      {% if request.user.role == 'admin' %}
-      <a href="{% url 'hostel-list' %}" {% if request.resolver_match.url_name == 'hostel-list' or request.resolver_match.url_name == 'hostel-update' or request.resolver_match.url_name == 'room-create' or request.resolver_match.url_name == 'room-update' %}aria-current="page"{% endif %}>Hostels</a>
-      {% endif %}
-      <a href="{% url 'bed-list' %}" {% if request.resolver_match.url_name == 'bed-list' %}aria-current="page"{% endif %}>Beds</a>
-      {% if request.user.role == 'admin' %}
-      <a href="{% url 'user-management' %}" {% if request.resolver_match.url_name == 'user-management' or request.resolver_match.url_name == 'user-update' %}aria-current="page"{% endif %}>Accounts</a>
-      <a href="{% url 'audit-log' %}" {% if request.resolver_match.url_name == 'audit-log' %}aria-current="page"{% endif %}>Audit log</a>
-      {% endif %}
-      <a href="{% url 'settings' %}" {% if request.resolver_match.url_name == 'settings' %}aria-current="page"{% endif %}>Settings</a>
-    </nav>
-    <div class="account-menu"><span>{{ request.user.username }} · {{ request.user.get_role_display }}</span>
-      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="secondary" type="submit">Sign out</button></form>
-    </div>
+      {% with current_url=request.resolver_match.url_name %}
+      <nav aria-label="Main navigation">
+        <a href="{% url 'dashboard' %}"{% if current_url == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+        {% if request.user.role == 'student' %}
+        <a href="{% url 'student-self-service' %}"{% if current_url == 'student-self-service' %} aria-current="page"{% endif %}>My records</a>
+        {% endif %}
+        {% if request.user.role == 'admin' or request.user.role == 'warden' %}
+        <a href="{% url 'student-list' %}"{% if current_url == 'student-list' or current_url == 'student-create' or current_url == 'student-update' %} aria-current="page"{% endif %}>Students</a>
+        <a href="{% url 'allocation-list' %}"{% if current_url == 'allocation-list' or current_url == 'allocation-create' or current_url == 'allocation-history' or current_url == 'allocation-transfer' or current_url == 'allocation-release' %} aria-current="page"{% endif %}>Allocations</a>
+        <a href="{% url 'payment-list' %}"{% if current_url == 'payment-list' or current_url == 'payment-create' or current_url == 'payment-receipt' or current_url == 'payment-adjust' or current_url == 'student-payment-status' %} aria-current="page"{% endif %}>Payments</a>
+        <a href="{% url 'occupancy-report' %}"{% if current_url == 'occupancy-report' or current_url == 'payment-status-report' %} aria-current="page"{% endif %}>Reports</a>
+        {% endif %}
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'hostel-list' %}"{% if current_url == 'hostel-list' or current_url == 'hostel-update' or current_url == 'room-create' or current_url == 'room-update' %} aria-current="page"{% endif %}>Hostels</a>
+        {% endif %}
+        <a href="{% url 'bed-list' %}"{% if current_url == 'bed-list' %} aria-current="page"{% endif %}>Beds</a>
+        {% if request.user.role == 'admin' %}
+        <a href="{% url 'user-management' %}"{% if current_url == 'user-management' or current_url == 'user-update' %} aria-current="page"{% endif %}>Accounts</a>
+        <a href="{% url 'audit-log' %}"{% if current_url == 'audit-log' %} aria-current="page"{% endif %}>Audit log</a>
+        {% endif %}
+        <a href="{% url 'settings' %}"{% if current_url == 'settings' %} aria-current="page"{% endif %}>Settings</a>
+      </nav>
+      {% endwith %}
+      <div class="account-menu">
+        <span>{{ request.user.username }} · {{ request.user.get_role_display }}</span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="secondary" type="submit">Sign out</button>
+        </form>
+      </div>
     {% endif %}
   </header>
   <main id="main" class="container">
-    {% for message in messages %}<div class="notice {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}
+    {% for message in messages %}
+    <div class="notice {{ message.tags }}" role="status">{{ message }}</div>
+    {% endfor %}
     {% block content %}{% endblock %}
   </main>
 </body>

@@ -1,7 +1,16 @@
 {% extends "base.html" %}
+
 {% block title %}{% if original %}Adjust payment{% else %}Record payment{% endif %}{% endblock %}
+
 {% block content %}
 <h1>{% if original %}Adjust payment{% else %}Record payment{% endif %}</h1>
-{% if original %}<p>Original receipt <a href="{% url 'payment-receipt' original.receipt_no %}">{{ original.receipt_no }}</a>: INR {{ original.amount|floatformat:2 }} for {{ original.student }}. The original entry remains in the history.</p>{% endif %}
-<form method="post" class="card">{% csrf_token %}{% include "includes/form.html" %}<button type="submit">Record {% if original %}adjustment{% else %}payment{% endif %}</button> <a href="{% url 'payment-list' %}">Cancel</a></form>
+{% if original %}
+<p>Original receipt <a href="{% url 'payment-receipt' original.receipt_no %}">{{ original.receipt_no }}</a>: INR {{ original.amount|floatformat:2 }} for {{ original.student }}. The original entry remains in the history.</p>
+{% endif %}
+<form method="post" class="card">
+  {% csrf_token %}
+  {% include "includes/form.html" %}
+  <button type="submit">Record {% if original %}adjustment{% else %}payment{% endif %}</button>
+  <a href="{% url 'payment-list' %}">Cancel</a>
+</form>
 {% endblock %}

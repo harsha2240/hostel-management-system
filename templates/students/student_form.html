@@ -7,10 +7,9 @@
 <h1>{{ heading }}</h1>
 
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-
-    <button type="submit">Save Student</button>
-    <a href="{% url 'student-list' %}">Cancel</a>
+  {% csrf_token %}
+  {% include "includes/form.html" %}
+  <button type="submit">Save Student</button>
+  <a href="{% url 'student-list' %}">Cancel</a>
 </form>
 {% endblock %}

@@ -4,7 +4,10 @@
 
 {% block content %}
 <div class="page-heading">
-  <div><p class="eyebrow">Student account</p><h1>My hostel &amp; payments</h1></div>
+  <div>
+    <p class="eyebrow">Student account</p>
+    <h1>My hostel &amp; payments</h1>
+  </div>
 </div>
 
 {% if not student %}
@@ -15,42 +18,107 @@
 {% else %}
 <p class="muted">{{ student.name }} · Student ID {{ student.student_id }}</p>
 <div class="student-summary" aria-label="Payment summary">
-  <div class="summary-card"><span class="eyebrow">Payment status</span><strong>{{ payment_summary.status }}</strong><span class="muted">{% if payment_summary.fee_configured %}Current hostel fee{% else %}No hostel fee is configured{% endif %}</span></div>
-  <div class="summary-card"><span class="eyebrow">Paid</span><strong>₹{{ payment_summary.paid }}</strong><span class="muted">Amount recorded for your account</span></div>
-  <div class="summary-card"><span class="eyebrow">Balance due</span><strong>₹{{ payment_summary.due }}</strong><span class="muted">{% if payment_summary.fee_configured %}Against ₹{{ payment_summary.fee }}{% else %}Fee will appear after staff configure your room{% endif %}</span></div>
+  <div class="summary-card">
+    <span class="eyebrow">Payment status</span>
+    <strong>{{ payment_summary.status }}</strong>
+    <span class="muted">{% if payment_summary.fee_configured %}Current hostel fee{% else %}No hostel fee is configured{% endif %}</span>
+  </div>
+  <div class="summary-card">
+    <span class="eyebrow">Paid</span>
+    <strong>₹{{ payment_summary.paid }}</strong>
+    <span class="muted">Amount recorded for your account</span>
+  </div>
+  <div class="summary-card">
+    <span class="eyebrow">Balance due</span>
+    <strong>₹{{ payment_summary.due }}</strong>
+    <span class="muted">{% if payment_summary.fee_configured %}Against ₹{{ payment_summary.fee }}{% else %}Fee will appear after staff configure your room{% endif %}</span>
+  </div>
 </div>
 
 <section class="card" aria-labelledby="current-allocation-heading">
   <h2 id="current-allocation-heading">Current allocation</h2>
   {% if current_allocation %}
   <dl>
-    <dt>Hostel</dt><dd>{{ current_allocation.bed.room.hostel.name }}</dd>
-    <dt>Floor</dt><dd>{{ current_allocation.bed.room.floor }}</dd>
-    <dt>Room</dt><dd>{{ current_allocation.bed.room.room_number }}</dd>
-    <dt>Bed</dt><dd>{{ current_allocation.bed.label }}</dd>
-    <dt>Allocated on</dt><dd>{{ current_allocation.allocated_on|date:"d M Y" }}</dd>
+    <dt>Hostel</dt>
+    <dd>{{ current_allocation.bed.room.hostel.name }}</dd>
+    <dt>Floor</dt>
+    <dd>{{ current_allocation.bed.room.floor }}</dd>
+    <dt>Room</dt>
+    <dd>{{ current_allocation.bed.room.room_number }}</dd>
+    <dt>Bed</dt>
+    <dd>{{ current_allocation.bed.label }}</dd>
+    <dt>Allocated on</dt>
+    <dd>{{ current_allocation.allocated_on|date:"d M Y" }}</dd>
   </dl>
-  {% else %}<p>You do not have an active room allocation.</p>{% endif %}
+  {% else %}
+  <p>You do not have an active room allocation.</p>
+  {% endif %}
 </section>
 
 <section class="card" aria-labelledby="allocation-history-heading">
   <h2 id="allocation-history-heading">Allocation history</h2>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Hostel</th><th>Room</th><th>Bed</th><th>Allocated</th><th>Vacated</th><th>Status</th></tr></thead>
-    <tbody>{% for allocation in allocations %}
-      <tr><td>{{ allocation.bed.room.hostel.name }}</td><td>{{ allocation.bed.room.room_number }}</td><td>{{ allocation.bed.label }}</td><td>{{ allocation.allocated_on|date:"d M Y" }}</td><td>{{ allocation.vacated_on|date:"d M Y"|default:"—" }}</td><td>{{ allocation.get_status_display }}</td></tr>
-    {% empty %}<tr><td colspan="6">No allocation history yet.</td></tr>{% endfor %}</tbody>
-  </table></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Hostel</th>
+          <th scope="col">Room</th>
+          <th scope="col">Bed</th>
+          <th scope="col">Allocated</th>
+          <th scope="col">Vacated</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for allocation in allocations %}
+        <tr>
+          <td>{{ allocation.bed.room.hostel.name }}</td>
+          <td>{{ allocation.bed.room.room_number }}</td>
+          <td>{{ allocation.bed.label }}</td>
+          <td>{{ allocation.allocated_on|date:"d M Y" }}</td>
+          <td>{{ allocation.vacated_on|date:"d M Y"|default:"—" }}</td>
+          <td>{{ allocation.get_status_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6">No allocation history yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="card" aria-labelledby="payment-history-heading">
   <h2 id="payment-history-heading">Payment history</h2>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Receipt</th><th>Date</th><th>Amount (INR)</th><th>Method</th><th>Entry</th></tr></thead>
-    <tbody>{% for payment in payments %}
-      <tr><td>{{ payment.receipt_no }}</td><td>{{ payment.date|date:"d M Y" }}</td><td>₹{{ payment.amount|floatformat:2 }}</td><td>{{ payment.mode }}</td><td>{% if payment.adjustment_of_id %}Adjustment to {{ payment.adjustment_of.receipt_no }}{% else %}Payment{% endif %}</td></tr>
-    {% empty %}<tr><td colspan="5">No payments are recorded for you yet.</td></tr>{% endfor %}</tbody>
-  </table></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Receipt</th>
+          <th scope="col">Date</th>
+          <th scope="col">Amount (INR)</th>
+          <th scope="col">Method</th>
+          <th scope="col">Entry</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in payments %}
+        <tr>
+          <td>{{ payment.receipt_no }}</td>
+          <td>{{ payment.date|date:"d M Y" }}</td>
+          <td>₹{{ payment.amount|floatformat:2 }}</td>
+          <td>{{ payment.mode }}</td>
+          <td>{% if payment.adjustment_of_id %}Adjustment to {{ payment.adjustment_of.receipt_no }}{% else %}Payment{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">No payments are recorded for you yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endif %}
 {% endblock %}

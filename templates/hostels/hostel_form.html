@@ -6,9 +6,9 @@
 {% block content %}
 <h1>{{ heading }}</h1>
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Hostel</button>
-    <a href="{% url 'hostel-list' %}">Cancel</a>
+  {% csrf_token %}
+  {% include "includes/form.html" %}
+  <button type="submit">Save Hostel</button>
+  <a href="{% url 'hostel-list' %}">Cancel</a>
 </form>
 {% endblock %}

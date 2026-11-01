@@ -1,20 +1,93 @@
 {% extends "base.html" %}
+
 {% block title %}{% if occupancy %}Occupancy report{% else %}Payment status report{% endif %}{% endblock %}
+
 {% block content %}
-<div class="page-heading"><div><p class="eyebrow">Reports</p><h1>{% if occupancy %}Occupancy{% else %}Payment status{% endif %}</h1></div><a href="{% if occupancy %}{% url 'payment-status-report' %}{% else %}{% url 'occupancy-report' %}{% endif %}">{% if occupancy %}Payment status report{% else %}Occupancy report{% endif %}</a></div>
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Reports</p>
+    <h1>{% if occupancy %}Occupancy{% else %}Payment status{% endif %}</h1>
+  </div>
+  <a href="{% if occupancy %}{% url 'payment-status-report' %}{% else %}{% url 'occupancy-report' %}{% endif %}">{% if occupancy %}Payment status report{% else %}Occupancy report{% endif %}</a>
+</div>
 <form method="get" class="card filters">
-  <div class="form-field"><label for="hostel">Hostel</label><select id="hostel" name="hostel"><option value="">All hostels</option>{% for hostel in hostels %}<option value="{{ hostel.pk }}" {% if selected_hostel == hostel.pk %}selected{% endif %}>{{ hostel.name }}</option>{% endfor %}</select></div>
-  <button type="submit">View report</button><button class="secondary" type="submit" name="format" value="csv">Download CSV</button>
+  <div class="form-field">
+    <label for="hostel">Hostel</label>
+    <select id="hostel" name="hostel">
+      <option value="">All hostels</option>
+      {% for hostel in hostels %}
+      <option value="{{ hostel.pk }}"{% if selected_hostel == hostel.pk %} selected{% endif %}>{{ hostel.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit">View report</button>
+  <button class="secondary" type="submit" name="format" value="csv">Download CSV</button>
 </form>
 <p class="muted">Generated on {{ generated_on|date:"d-m-Y H:i:s" }} IST.</p>
-{% if not occupancy %}<p>Balances use each student's current or most recent room fee and all recorded payments. Unassigned or unconfigured fees remain Pending.</p>{% endif %}
-<div class="table-wrap"><table>
-{% if occupancy %}
-  <thead><tr><th>Hostel</th><th>Total beds</th><th>Occupied</th><th>Available</th><th>Under maintenance</th><th>Occupancy %</th></tr></thead>
-  <tbody>{% for row in rows %}<tr><td>{{ row.hostel }}</td><td>{{ row.total_beds }}</td><td>{{ row.occupied_beds }}</td><td>{{ row.available_beds }}</td><td>{{ row.maintenance_beds }}</td><td>{{ row.occupancy_percent }}%</td></tr>{% empty %}<tr><td colspan="6">No hostels found.</td></tr>{% endfor %}</tbody>
-{% else %}
-  <thead><tr><th>Student ID</th><th>Name</th><th>Hostel</th><th>Room</th><th>Fee (INR)</th><th>Paid (INR)</th><th>Due (INR)</th><th>Status</th></tr></thead>
-  <tbody>{% for row in rows %}<tr><td>{{ row.student_id }}</td><td>{{ row.student_name }}</td><td>{{ row.hostel|default:"Unassigned" }}</td><td>{{ row.room|default:"Unassigned" }}</td><td>{{ row.fee }}</td><td>{{ row.paid }}</td><td>{{ row.due }}</td><td>{{ row.status }}</td></tr>{% empty %}<tr><td colspan="8">No students found for this hostel.</td></tr>{% endfor %}</tbody>
+{% if not occupancy %}
+<p>Balances use each student's current or most recent room fee and all recorded payments. Unassigned or unconfigured fees remain Pending.</p>
 {% endif %}
-</table></div>
+<div class="table-wrap">
+  <table>
+    {% if occupancy %}
+    <thead>
+      <tr>
+        <th scope="col">Hostel</th>
+        <th scope="col">Total beds</th>
+        <th scope="col">Occupied</th>
+        <th scope="col">Available</th>
+        <th scope="col">Under maintenance</th>
+        <th scope="col">Occupancy %</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.hostel }}</td>
+        <td>{{ row.total_beds }}</td>
+        <td>{{ row.occupied_beds }}</td>
+        <td>{{ row.available_beds }}</td>
+        <td>{{ row.maintenance_beds }}</td>
+        <td>{{ row.occupancy_percent }}%</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">No hostels found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    {% else %}
+    <thead>
+      <tr>
+        <th scope="col">Student ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Hostel</th>
+        <th scope="col">Room</th>
+        <th scope="col">Fee (INR)</th>
+        <th scope="col">Paid (INR)</th>
+        <th scope="col">Due (INR)</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.student_id }}</td>
+        <td>{{ row.student_name }}</td>
+        <td>{{ row.hostel|default:"Unassigned" }}</td>
+        <td>{{ row.room|default:"Unassigned" }}</td>
+        <td>{{ row.fee }}</td>
+        <td>{{ row.paid }}</td>
+        <td>{{ row.due }}</td>
+        <td>{{ row.status }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8">No students found for this hostel.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    {% endif %}
+  </table>
+</div>
 {% endblock %}

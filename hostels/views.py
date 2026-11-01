@@ -9,7 +9,7 @@ from accounts.models import User
 from audit.models import AuditEvent
 from audit.services import record_event
 
-from .forms import HostelForm, RoomForm
+from .forms import BedFilterForm, HostelForm, RoomForm
 from .models import Bed, Hostel, Room
 
 
@@ -143,20 +143,27 @@ def room_update(request, pk):
 @login_required
 def bed_list(request):
     beds = Bed.objects.select_related("room__hostel")
+    filter_form = BedFilterForm(request.GET)
+    valid_filters = filter_form.is_valid()
 
     hostel_id = request.GET.get("hostel")
     floor = request.GET.get("floor")
     room_type = request.GET.get("room_type")
     status = request.GET.get("status", Bed.BedStatus.AVAILABLE)
 
-    if hostel_id:
-        beds = beds.filter(room__hostel_id=hostel_id)
-    if floor:
-        beds = beds.filter(room__floor=floor)
-    if room_type:
-        beds = beds.filter(room__room_type=room_type)
-    if status:
-        beds = beds.filter(status=status)
+    if valid_filters:
+        cleaned_hostel = filter_form.cleaned_data["hostel"]
+        cleaned_floor = filter_form.cleaned_data["floor"]
+        if cleaned_hostel is not None:
+            beds = beds.filter(room__hostel_id=cleaned_hostel)
+        if cleaned_floor is not None:
+            beds = beds.filter(room__floor=cleaned_floor)
+        if room_type:
+            beds = beds.filter(room__room_type=room_type)
+        if status:
+            beds = beds.filter(status=status)
+    else:
+        beds = beds.none()
 
     page_obj = Paginator(beds, 50).get_page(request.GET.get("page"))
 
@@ -165,6 +172,7 @@ def bed_list(request):
         "hostels/bed_list.html",
         {
             "beds": page_obj.object_list,
+            "filter_form": filter_form,
             "page_obj": page_obj,
             "hostels": Hostel.objects.filter(is_active=True),
             "room_types": Room.RoomType.choices,
@@ -174,4 +182,5 @@ def bed_list(request):
             "selected_room_type": room_type or "",
             "selected_status": status,
         },
+        status=200 if valid_filters else 400,
     )

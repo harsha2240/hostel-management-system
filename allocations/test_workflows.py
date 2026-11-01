@@ -36,6 +36,81 @@ class AllocationWorkflowTests(TestCase):
     def create(self):
         return allocate(student=self.student, bed=self.bed, actor=self.actor)
 
+    def test_json_date_types_return_400_without_changing_allocations(self):
+        values = (123, True, ["2026-10-26"], {"day": 26})
+        before_audits = AuditEvent.objects.count()
+        for value in values:
+            with self.subTest(action="allocate", value=value):
+                response = self.client.post(
+                    reverse("allocation-list"),
+                    {
+                        "student_id": self.student.student_id,
+                        "bed_id": self.bed.pk,
+                        "allocated_on": value,
+                    },
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 400)
+                if isinstance(value, (int, bool)):
+                    self.assertEqual(
+                        response.json()["error"]["fields"]["allocated_on"][0]["code"],
+                        "invalid",
+                    )
+        self.assertFalse(Allocation.objects.exists())
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
+        original = self.create()
+        before_audits = AuditEvent.objects.count()
+        for value in values:
+            with self.subTest(action="release", value=value):
+                response = self.client.post(
+                    reverse("allocation-release", args=[original.pk]),
+                    {"vacate_date": value},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 400)
+                if isinstance(value, (int, bool)):
+                    self.assertEqual(
+                        response.json()["error"]["fields"]["vacate_date"][0]["code"],
+                        "invalid",
+                    )
+        original.refresh_from_db()
+        self.bed.refresh_from_db()
+        self.assertEqual(original.status, "Active")
+        self.assertEqual(self.bed.status, "Occupied")
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
+    def test_json_reference_types_cannot_select_a_different_integer_key(self):
+        before_audits = AuditEvent.objects.count()
+        for value in (self.bed.pk + 0.5, float(self.bed.pk), True, False):
+            with self.subTest(action="allocate", value=value):
+                response = self.client.post(
+                    reverse("allocation-list"),
+                    {"student_id": self.student.student_id, "bed_id": value},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertFalse(Allocation.objects.exists())
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
+        original = self.create()
+        before_audits = AuditEvent.objects.count()
+        for value in (self.other.pk + 0.5, float(self.other.pk), True, False):
+            with self.subTest(action="transfer", value=value):
+                response = self.client.post(
+                    reverse("allocation-transfer", args=[original.pk]),
+                    {"new_bed_id": value},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 404)
+        original.refresh_from_db()
+        self.other.refresh_from_db()
+        self.assertEqual(original.status, "Active")
+        self.assertEqual(self.other.status, "Available")
+        self.assertEqual(Allocation.objects.count(), 1)
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
     def test_transfer_and_release_preserve_history_and_emit_actor_audit(self):
         original = self.create()
         successor = transfer(

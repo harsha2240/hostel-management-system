@@ -3,17 +3,18 @@ from decimal import Decimal
 from django import forms
 from django.utils import timezone
 
+from hms.forms import DateField, ModelChoiceField
 from students.models import Student
 
 from .models import Payment
 
 
 class PaymentForm(forms.Form):
-    student = forms.ModelChoiceField(queryset=Student.objects.all())
+    student = ModelChoiceField(queryset=Student.objects.all())
     amount = forms.DecimalField(
         max_digits=10, decimal_places=2, min_value=Decimal("0.01"), label="Amount (INR)"
     )
-    date = forms.DateField(
+    date = DateField(
         initial=timezone.localdate, widget=forms.DateInput(attrs={"type": "date"})
     )
     mode = forms.ChoiceField(choices=Payment.Mode.choices)

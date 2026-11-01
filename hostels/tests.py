@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.html import escape
 
 from accounts.models import User
 from allocations.models import Allocation
@@ -498,6 +499,93 @@ class BedFilteringViewTests(TestCase):
         beds = list(response.context["beds"])
 
         self.assertEqual(beds, [self.available_bed])
+
+    def test_invalid_numeric_filters_return_400_without_bed_results(self):
+        invalid_values = {
+            "hostel": ["bad", "1.5", "-1", "0", str(2**63), "9" * 5000],
+            "floor": ["bad", "1.5", "-1", "65536", "9" * 5000],
+        }
+
+        for field, values in invalid_values.items():
+            for value in values:
+                with self.subTest(field=field, value=value[:30]):
+                    response = self.client.get(
+                        reverse("bed-list"), {field: value, "status": ""}
+                    )
+
+                    self.assertEqual(response.status_code, 400)
+                    self.assertEqual(list(response.context["beds"]), [])
+                    self.assertEqual(response.context["page_obj"].paginator.count, 0)
+                    self.assertIn(field, response.context["filter_form"].errors)
+                    self.assertContains(response, 'role="alert"', status_code=400)
+                    self.assertNotContains(
+                        response,
+                        f"<td>{self.available_bed.label}</td>",
+                        status_code=400,
+                    )
+
+    def test_invalid_floor_is_escaped_and_other_filter_values_are_preserved(self):
+        value = '"><script>alert("bad filter")</script>'
+        response = self.client.get(
+            reverse("bed-list"),
+            {
+                "hostel": self.hostel1.pk,
+                "floor": value,
+                "room_type": Room.RoomType.DOUBLE,
+                "status": Bed.BedStatus.OCCUPIED,
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(list(response.context["beds"]), [])
+        self.assertEqual(response.context["selected_hostel"], str(self.hostel1.pk))
+        self.assertEqual(response.context["selected_floor"], value)
+        self.assertEqual(response.context["selected_room_type"], Room.RoomType.DOUBLE)
+        self.assertEqual(response.context["selected_status"], Bed.BedStatus.OCCUPIED)
+        self.assertContains(response, "Floor: Enter a whole number.", status_code=400)
+        self.assertContains(response, escape(value), status_code=400)
+        self.assertNotContains(response, "<script>", status_code=400)
+
+    def test_zero_and_upper_boundary_floor_filters_match_only_their_beds(self):
+        for floor in (0, 65535):
+            with self.subTest(floor=floor):
+                room = Room.objects.create(
+                    hostel=self.hostel1,
+                    room_number=f"B{floor}",
+                    floor=floor,
+                    room_type=Room.RoomType.SINGLE,
+                    capacity=1,
+                )
+                response = self.client.get(
+                    reverse("bed-list"),
+                    {
+                        "hostel": self.hostel1.pk,
+                        "floor": str(floor),
+                        "room_type": Room.RoomType.SINGLE,
+                    },
+                )
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(list(response.context["beds"]), list(room.beds.all()))
+                self.assertEqual(response.context["selected_floor"], str(floor))
+
+    def test_maximum_hostel_id_is_valid_and_has_no_matches(self):
+        response = self.client.get(reverse("bed-list"), {"hostel": str(2**63 - 1)})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["beds"]), [])
+        self.assertFalse(response.context["filter_form"].errors)
+
+    def test_invalid_filters_do_not_bypass_login(self):
+        self.client.logout()
+
+        response = self.client.get(reverse("bed-list"), {"floor": "bad"})
+
+        self.assertRedirects(
+            response,
+            f"{reverse('login')}?next={reverse('bed-list')}%3Ffloor%3Dbad",
+            fetch_redirect_response=False,
+        )
 
     def test_bed_list_is_paginated_and_keeps_filters_on_next_page(self):
         for index in range(13):

@@ -10,10 +10,19 @@
   </div>
   <span class="muted">Browse rooms by location and type</span>
 </div>
+{% if filter_form.errors %}
+<div class="notice error" role="alert" id="bed-filter-errors">
+  {% for field in filter_form %}
+  {% for error in field.errors %}
+  <p>{{ field.label }}: {{ error }}</p>
+  {% endfor %}
+  {% endfor %}
+</div>
+{% endif %}
 <form method="get" class="card filters">
   <div class="form-field">
     <label for="hostel">Hostel</label>
-    <select name="hostel" id="hostel">
+    <select name="hostel" id="hostel"{% if filter_form.hostel.errors %} aria-invalid="true" aria-describedby="bed-filter-errors"{% endif %}>
       <option value="">All hostels</option>
       {% for hostel in hostels %}
       <option value="{{ hostel.pk }}"{% if selected_hostel == hostel.pk|stringformat:"s" %} selected{% endif %}>{{ hostel.name }}</option>
@@ -22,7 +31,7 @@
   </div>
   <div class="form-field">
     <label for="floor">Floor</label>
-    <input type="number" name="floor" id="floor" value="{{ selected_floor }}">
+    <input type="number" name="floor" id="floor" value="{{ selected_floor }}" min="0" max="65535" step="1"{% if filter_form.floor.errors %} aria-invalid="true" aria-describedby="bed-filter-errors"{% endif %}>
   </div>
   <div class="form-field">
     <label for="room_type">Room type</label>

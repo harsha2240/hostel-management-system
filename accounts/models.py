@@ -1,6 +1,6 @@
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import UserManager
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -21,8 +21,6 @@ class User(AbstractUser):
     objects = UserManager()
 
     def is_locked(self):
-        from django.utils import timezone
-
         return bool(self.locked_until and self.locked_until > timezone.now())
 
     def save(self, *args, **kwargs):

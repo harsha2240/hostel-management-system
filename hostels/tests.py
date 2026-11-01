@@ -1,25 +1,18 @@
 
 from datetime import date
+from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import Client, TestCase
 from django.urls import reverse
-from unittest.mock import patch
 
 from accounts.models import User
-from audit.models import AuditEvent
 from allocations.models import Allocation
+from audit.models import AuditEvent
 from students.models import Student
 
 from .models import Bed, Hostel, Room
-
-class HostelModelTests(TestCase):
-    def setUp(self):
-        self.hostel = Hostel.objects.create(
-            name="Test Hostel",
-            hostel_type=Hostel.HostelType.BOYS,
-        )
 
 
 class HostelManagementViewTests(TestCase):

@@ -4,18 +4,16 @@ from time import perf_counter
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
-from django.test import TestCase, Client
+from django.db import IntegrityError, transaction
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from accounts.models import User
-from audit.models import AuditEvent
 from allocations.models import Allocation
-from hostels.models import Bed, Hostel, Room
-from students.models import Student
-
+from audit.models import AuditEvent
+from hostels.models import Hostel, Room
 from students.forms import StudentForm
-from django.test import override_settings
-from time import perf_counter
+from students.models import Student
 
 
 class StudentModelTests(TestCase):
@@ -43,7 +41,7 @@ class StudentModelTests(TestCase):
 
     def test_duplicate_student_id_is_rejected(self):
         Student.objects.create(**self.student_data())
-        with self.assertRaises(Exception):
+        with self.assertRaises(IntegrityError), transaction.atomic():
             Student.objects.create(**self.student_data(name="Another Student"))
 
     def test_duplicate_student_id_form_shows_exact_error_message(self):

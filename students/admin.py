@@ -1,5 +1,7 @@
 from django.contrib import admin
+
 from audit.mixins import AuditedAdminMixin
+
 from .models import Student
 
 

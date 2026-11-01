@@ -1,7 +1,7 @@
-from datetime import timedelta
 import os
-from unittest import skipIf
+from datetime import timedelta
 from time import perf_counter
+from unittest import skipIf
 
 from django.conf import settings
 from django.test import Client, TestCase, override_settings
@@ -13,7 +13,6 @@ from audit.models import AuditEvent
 from .models import User
 
 
-@override_settings(DJANGO_SECRET_KEY='test-secret')
 class AuthenticationTests(TestCase):
     def setUp(self):
         self.student = User.objects.create_user(username='student1', password='Validpass123', role=User.Role.STUDENT)

@@ -26,7 +26,9 @@ def payment_status_queryset(students=None):
     latest = (
         Allocation.objects.filter(student_id=OuterRef("pk"))
         .exclude(status=Allocation.AllocationStatus.CANCELLED)
-        .annotate(priority=Case(When(status="Active", then=0), default=1))
+        .annotate(
+            priority=Case(When(status=Allocation.AllocationStatus.ACTIVE, then=0), default=1)
+        )
         .order_by("priority", "-allocated_on", "-pk")
     )
     totals = (
@@ -54,9 +56,12 @@ def payment_status_queryset(students=None):
 
 def status_row(student):
     fee, paid = student.fee_amount, student.amount_paid
-    status = (
-        "Pending" if fee <= 0 or paid <= 0 else "Paid" if paid >= fee else "Partial"
-    )
+    if fee <= 0 or paid <= 0:
+        status = "Pending"
+    elif paid >= fee:
+        status = "Paid"
+    else:
+        status = "Partial"
     return {
         "student_id": student.student_id,
         "student_name": student.name,

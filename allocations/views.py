@@ -57,7 +57,7 @@ def available_beds():
     return (
         Bed.objects.select_related("room__hostel")
         .filter(status=Bed.BedStatus.AVAILABLE, room__hostel__is_active=True)
-        .exclude(allocations__status="Active")
+        .exclude(allocations__status=Allocation.AllocationStatus.ACTIVE)
     )
 
 
@@ -127,8 +127,8 @@ def allocation_create(request):
             return response
     else:
         form.fields["student"].queryset = Student.objects.filter(
-            status="Active"
-        ).exclude(allocations__status="Active")
+            status=Student.Status.ACTIVE
+        ).exclude(allocations__status=Allocation.AllocationStatus.ACTIVE)
         form.fields["bed"].queryset = available_beds()
     return render(
         request,

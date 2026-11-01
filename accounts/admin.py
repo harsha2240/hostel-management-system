@@ -25,13 +25,13 @@ class HMSUserAdmin(AuditedAdminMixin, UserAdmin):
         return request.user.is_superuser and request.user.role == User.Role.ADMIN
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_superuser and request.user.role == User.Role.ADMIN
+        return self.has_module_permission(request)
 
     def has_add_permission(self, request):
-        return request.user.is_superuser and request.user.role == User.Role.ADMIN
+        return self.has_module_permission(request)
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_superuser and request.user.role == User.Role.ADMIN
+        return self.has_module_permission(request)
 
     def has_delete_permission(self, request, obj=None):
         return False  # Accounts are deactivated, never deleted.

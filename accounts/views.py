@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -50,7 +50,7 @@ def dashboard(request):
         User.Role.STUDENT: 'accounts/dashboard_student.html',
     }
     template = role_templates[request.user.role]
-    context = {'role': request.user.get_role_display()}
+    context = {}
     if request.user.role == User.Role.STUDENT:
         context.update({
             'available_bed_count': Bed.objects.filter(

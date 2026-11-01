@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import Bed, Hostel, Room
 from audit.mixins import AuditedAdminMixin
 from audit.models import AuditEvent
 from audit.services import record_event
-from .models import Hostel, Room, Bed
+
+from .models import Bed, Hostel, Room
 
 
 class RoomInline(admin.TabularInline):

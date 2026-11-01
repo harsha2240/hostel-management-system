@@ -1,5 +1,5 @@
-from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models, transaction
 
@@ -87,7 +87,7 @@ class Student(models.Model):
                 from allocations.models import Allocation
 
                 if Allocation.objects.filter(
-                    student_id=self.pk, status="Active"
+                    student_id=self.pk, status=Allocation.AllocationStatus.ACTIVE
                 ).exists():
                     raise ValidationError(
                         "Release this student's active allocation before deactivation.",

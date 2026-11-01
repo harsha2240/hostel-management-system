@@ -105,7 +105,7 @@ class Allocation(models.Model):
 
     @transaction.atomic
     def save(self, *args, **kwargs):
-        from hostels.models import Bed, Room
+        from hostels.models import Bed, Hostel, Room
         from students.models import Student
 
         # Lock Student, then Rooms/Beds in PK order, then Allocation.
@@ -153,8 +153,8 @@ class Allocation(models.Model):
                     "This hostel is inactive.", code="INACTIVE_HOSTEL"
                 )
             expected = {
-                Student.Gender.MALE: "Boys",
-                Student.Gender.FEMALE: "Girls",
+                Student.Gender.MALE: Hostel.HostelType.BOYS,
+                Student.Gender.FEMALE: Hostel.HostelType.GIRLS,
             }.get(student.gender)
             if bed.room.hostel.hostel_type != expected:
                 raise ValidationError(
@@ -162,7 +162,9 @@ class Allocation(models.Model):
                     code="GENDER_MISMATCH",
                 )
             if (
-                Allocation.objects.filter(student_id=student.pk, status="Active")
+                Allocation.objects.filter(
+                    student_id=student.pk, status=self.AllocationStatus.ACTIVE
+                )
                 .exclude(pk=self.pk)
                 .exists()
             ):
@@ -171,7 +173,9 @@ class Allocation(models.Model):
                     code="ALREADY_ALLOCATED",
                 )
             if (
-                Allocation.objects.filter(bed_id=bed.pk, status="Active")
+                Allocation.objects.filter(
+                    bed_id=bed.pk, status=self.AllocationStatus.ACTIVE
+                )
                 .exclude(pk=self.pk)
                 .exists()
             ):

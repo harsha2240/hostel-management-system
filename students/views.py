@@ -13,10 +13,11 @@ from accounts.models import User
 from allocations.models import Allocation
 from audit.models import AuditEvent
 from audit.services import record_event
-from .forms import StudentForm
-from .models import Student
 from payments.models import Payment
 from payments.services import payment_status_queryset, status_row
+
+from .forms import StudentForm
+from .models import Student
 
 
 def can_manage_students(user):

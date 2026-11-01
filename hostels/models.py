@@ -133,8 +133,6 @@ class Room(models.Model):
         # Remove excess beds only when they have no allocation history.
         # Beds with allocation records must be preserved.
         if self.beds.count() > self.capacity:
-            from allocations.models import Allocation
-
             removable_beds = (
                 self.beds.exclude(allocations__isnull=False)
                 .order_by("-label")

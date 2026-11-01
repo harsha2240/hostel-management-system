@@ -11,9 +11,9 @@ class User(AbstractUser):
     """
 
     class Role(models.TextChoices):
-        ADMIN = 'admin', 'Admin'
-        WARDEN = 'warden', 'Warden'
-        STUDENT = 'student', 'Student'
+        ADMIN = "admin", "Admin"
+        WARDEN = "warden", "Warden"
+        STUDENT = "student", "Student"
 
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.STUDENT)
     failed_attempts = models.PositiveSmallIntegerField(default=0)
@@ -26,6 +26,6 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if self.is_superuser and self.role != self.Role.ADMIN:
             self.role = self.Role.ADMIN
-            if kwargs.get('update_fields') is not None:
-                kwargs['update_fields'] = set(kwargs['update_fields']) | {'role'}
+            if kwargs.get("update_fields") is not None:
+                kwargs["update_fields"] = set(kwargs["update_fields"]) | {"role"}
         super().save(*args, **kwargs)

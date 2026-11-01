@@ -121,12 +121,12 @@ class AllocationWorkflowTests(TestCase):
                 self.subTest(field=field),
                 self.assertRaises(IntegrityError),
                 transaction.atomic(),
+                connection.cursor() as cursor,
             ):
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        f"UPDATE allocations_allocation SET {field}=NULL WHERE id=%s",
-                        [allocation.pk],
-                    )
+                cursor.execute(
+                    f"UPDATE allocations_allocation SET {field}=NULL WHERE id=%s",
+                    [allocation.pk],
+                )
 
     def test_transfer_failure_rolls_back_both_beds_and_history(self):
         original = self.create()
@@ -153,22 +153,26 @@ class AllocationWorkflowTests(TestCase):
         self.assertFalse(AuditEvent.objects.filter(action="transfer").exists())
 
     def test_audit_failure_rolls_back_allocation_and_release(self):
-        with patch(
-            "allocations.services.record_event",
-            side_effect=RuntimeError("audit unavailable"),
+        with (
+            patch(
+                "allocations.services.record_event",
+                side_effect=RuntimeError("audit unavailable"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                self.create()
+            self.create()
         self.bed.refresh_from_db()
         self.assertEqual(self.bed.status, "Available")
         self.assertEqual(Allocation.objects.count(), 0)
         allocation = self.create()
-        with patch(
-            "allocations.services.record_event",
-            side_effect=RuntimeError("audit unavailable"),
+        with (
+            patch(
+                "allocations.services.record_event",
+                side_effect=RuntimeError("audit unavailable"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                release(allocation_id=allocation.pk, actor=self.actor)
+            release(allocation_id=allocation.pk, actor=self.actor)
         allocation.refresh_from_db()
         self.bed.refresh_from_db()
         self.assertEqual((allocation.status, self.bed.status), ("Active", "Occupied"))
@@ -251,6 +255,39 @@ class AllocationWorkflowTests(TestCase):
             ).status_code,
             302,
         )
+
+    def test_json_form_errors_preserve_reference_and_validation_status_codes(self):
+        response = self.client.post(
+            reverse("allocation-create"),
+            {"student_id": self.student.student_id, "bed_id": 999999},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertEqual(
+            response.json()["error"]["fields"]["bed"][0]["code"], "invalid_choice"
+        )
+
+        allocation = self.create()
+        response = self.client.post(
+            reverse("allocation-transfer", args=[allocation.pk]),
+            {"new_bed_id": 999999},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertIn("new_bed", response.json()["error"]["fields"])
+
+        response = self.client.post(
+            reverse("allocation-release", args=[allocation.pk]),
+            {},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"]["code"], "VALIDATION_ERROR")
+        self.assertIn("vacate_date", response.json()["error"]["fields"])
+        allocation.refresh_from_db()
+        self.assertEqual(allocation.status, "Active")
 
 
 class AllocationConcurrencyTests(TransactionTestCase):

@@ -14,16 +14,19 @@ class DatabaseConfigurationTests(TestCase):
             return cursor.fetchone()[0]
 
     def test_connects_to_mysql_8(self):
-        self.assertEqual(connection.vendor, 'mysql')
+        self.assertEqual(connection.vendor, "mysql")
         self.assertFalse(connection.mysql_is_mariadb)
         self.assertGreaterEqual(connection.mysql_version, (8, 0))
 
     def test_sql_mode_keeps_mysql_8_safety_modes(self):
-        sql_mode = set(self.query_one('SELECT @@SESSION.sql_mode').split(','))
+        sql_mode = set(self.query_one("SELECT @@SESSION.sql_mode").split(","))
         expected = {
-            'ONLY_FULL_GROUP_BY', 'STRICT_TRANS_TABLES', 'NO_ZERO_IN_DATE',
-            'NO_ZERO_DATE', 'ERROR_FOR_DIVISION_BY_ZERO',
-            'NO_ENGINE_SUBSTITUTION',
+            "ONLY_FULL_GROUP_BY",
+            "STRICT_TRANS_TABLES",
+            "NO_ZERO_IN_DATE",
+            "NO_ZERO_DATE",
+            "ERROR_FOR_DIVISION_BY_ZERO",
+            "NO_ENGINE_SUBSTITUTION",
         }
         self.assertEqual(expected - sql_mode, set())
 
@@ -38,10 +41,10 @@ class DatabaseConfigurationTests(TestCase):
     def test_date_lookups_use_india_dates(self):
         # 20:00 UTC on 13 Oct is 01:30 IST on 14 Oct.
         get_user_model().objects.create_user(
-            username='late-signup',
-            date_joined=datetime.datetime(
-                2026, 10, 13, 20, 0, tzinfo=datetime.timezone.utc),
+            username="late-signup",
+            date_joined=datetime.datetime(2026, 10, 13, 20, 0, tzinfo=datetime.UTC),
         )
         joined_on = get_user_model().objects.filter(
-            date_joined__date=datetime.date(2026, 10, 14))
+            date_joined__date=datetime.date(2026, 10, 14)
+        )
         self.assertEqual(joined_on.count(), 1)

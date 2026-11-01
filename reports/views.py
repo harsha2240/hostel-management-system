@@ -47,9 +47,13 @@ def report_response(request, kind):
     try:
         selected = request.GET.get("hostel", "").strip()
         if selected:
+            # Strip leading zeros before bounding the integer conversion. Python
+            # rejects extremely long digit strings before the range check can run.
+            selected = selected.lstrip("0")
             if (
                 not selected.isascii()
                 or not selected.isdigit()
+                or len(selected) > 19
                 or not 0 < int(selected) <= 2**63 - 1
             ):
                 raise ValidationError("Choose a valid hostel ID.")
@@ -75,10 +79,10 @@ def report_response(request, kind):
         columns = OCCUPANCY_COLUMNS if occupancy else PAYMENT_COLUMNS
         writer = csv.writer(response)
         writer.writerow([heading for heading, _ in columns] + ["Generated On"])
+        generated_label = generated_on.strftime("%d-%m-%Y %H:%M:%S IST")
         for row in rows:
             writer.writerow(
-                [csv_cell(row[key]) for _, key in columns]
-                + [generated_on.strftime("%d-%m-%Y %H:%M:%S IST")]
+                [csv_cell(row[key]) for _, key in columns] + [generated_label]
             )
         return response
     return render(

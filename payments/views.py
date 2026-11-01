@@ -8,7 +8,7 @@ from django.views.decorators.http import require_GET, require_http_methods
 
 from hms.decorators import staff_required
 from hms.http import api_error, request_data, wants_json
-from hms.responses import validation_response
+from hms.responses import form_error_response, validation_response
 from students.models import Student
 
 from .forms import AdjustmentForm, PaymentForm
@@ -89,16 +89,7 @@ def payment_form(request, original=None):
                 messages.success(request, f"Receipt {payment.receipt_no} recorded.")
                 return redirect("payment-receipt", receipt_no=payment.receipt_no)
             if wants_json(request):
-                missing = any(
-                    e.code == "invalid_choice"
-                    for e in form.errors.as_data().get("student", [])
-                )
-                return api_error(
-                    "Please correct the highlighted fields.",
-                    fields=form.errors.get_json_data(),
-                    code="NOT_FOUND" if missing else "VALIDATION_ERROR",
-                    status=404 if missing else 400,
-                )
+                return form_error_response(form, missing_fields=("student",))
         except ValidationError as error:
             if wants_json(request):
                 return validation_response(error)

@@ -27,7 +27,9 @@ def payment_status_queryset(students=None):
         Allocation.objects.filter(student_id=OuterRef("pk"))
         .exclude(status=Allocation.AllocationStatus.CANCELLED)
         .annotate(
-            priority=Case(When(status=Allocation.AllocationStatus.ACTIVE, then=0), default=1)
+            priority=Case(
+                When(status=Allocation.AllocationStatus.ACTIVE, then=0), default=1
+            )
         )
         .order_by("priority", "-allocated_on", "-pk")
     )

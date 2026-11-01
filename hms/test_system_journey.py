@@ -33,6 +33,7 @@ class StudentHostelJourneyTests(TestCase):
             capacity=2,
             fee_amount=Decimal("1000.00"),
         )
+        self.bed = self.room.beds.first()
         self.staff_client = self.client
         self.staff_client.force_login(self.warden)
         self.student_client = Client()
@@ -85,7 +86,9 @@ class StudentHostelJourneyTests(TestCase):
         )
         self.assertEqual(occupancy.status_code, 200)
         occupancy_row = next(
-            row for row in occupancy.json()["rows"] if row["hostel_id"] == self.hostel.pk
+            row
+            for row in occupancy.json()["rows"]
+            if row["hostel_id"] == self.hostel.pk
         )
         self.assertEqual(occupancy_row["occupied_beds"], 1)
 
@@ -112,7 +115,3 @@ class StudentHostelJourneyTests(TestCase):
             AuditEvent.objects.filter(user=self.warden).values_list("action", flat=True)
         )
         self.assertTrue({"allocate", "payment"}.issubset(event_actions))
-
-    @property
-    def bed(self):
-        return self.room.beds.first()

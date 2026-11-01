@@ -7,6 +7,8 @@ venv/
 
 # Django
 .env
+.env.*
+!.env.example
 *.log
 db.sqlite3
 db.sqlite3-journal
@@ -15,9 +17,11 @@ staticfiles/
 
 # Tests and coverage
 .coverage
+.coverage.*
 htmlcov/
 test-results/
 coverage.xml
+/coverage.json
 test-results.txt
 TEST-*.xml
 .ruff_cache/

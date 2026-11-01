@@ -15,19 +15,27 @@ def roles_required(*roles):
             if not request.user.is_authenticated:
                 if wants_json(request):
                     return api_error(
-                        'Sign in to continue.', code='AUTH_REQUIRED', status=401,
+                        "Sign in to continue.",
+                        code="AUTH_REQUIRED",
+                        status=401,
                     )
                 return redirect_to_login(request.get_full_path())
             if request.user.role not in roles:
                 record_event(
-                    user=request.user, action=AuditEvent.Action.ACCESS_DENIED,
-                    record_type='view', record_id=view.__name__,
+                    user=request.user,
+                    action=AuditEvent.Action.ACCESS_DENIED,
+                    record_type="view",
+                    record_id=view.__name__,
                 )
                 if wants_json(request):
                     return api_error(
-                        'Access denied', code='ACCESS_DENIED', status=403,
+                        "Access denied",
+                        code="ACCESS_DENIED",
+                        status=403,
                     )
-                return HttpResponseForbidden('Access denied')
+                return HttpResponseForbidden("Access denied")
             return view(request, *args, **kwargs)
+
         return wrapped
+
     return decorate

@@ -177,12 +177,14 @@ class PaymentWorkflowTests(TestCase):
             )
 
     def test_audit_failure_rolls_back_the_payment_and_receipt_counter(self):
-        with patch(
-            "payments.services.record_event",
-            side_effect=RuntimeError("audit unavailable"),
+        with (
+            patch(
+                "payments.services.record_event",
+                side_effect=RuntimeError("audit unavailable"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                self.record()
+            self.record()
         self.assertEqual(Payment.objects.count(), 0)
         self.assertEqual(ReceiptSequence.objects.get(pk=1).last_value, 0)
         self.assertEqual(self.record().receipt_no, "R00000000001")
@@ -245,12 +247,12 @@ class PaymentWorkflowTests(TestCase):
                 self.subTest(field=field, value=value),
                 self.assertRaises(IntegrityError),
                 transaction.atomic(),
+                connection.cursor() as cursor,
             ):
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        f"UPDATE payments_payment SET {field}=%s WHERE id=%s",
-                        [value, payment.pk],
-                    )
+                cursor.execute(
+                    f"UPDATE payments_payment SET {field}=%s WHERE id=%s",
+                    [value, payment.pk],
+                )
 
     def test_receipt_range_exhaustion_fails_without_overwriting_history(self):
         ReceiptSequence.objects.filter(pk=1).update(last_value=99999999999)
@@ -439,6 +441,26 @@ class PaymentWorkflowTests(TestCase):
                 401,
                 url,
             )
+
+    def test_form_encoded_missing_student_preserves_json_not_found_response(self):
+        response = self.client.post(
+            reverse("payment-create"),
+            {
+                "student": 999999,
+                "amount": "100",
+                "date": timezone.localdate().isoformat(),
+                "mode": "Cash",
+            },
+            HTTP_ACCEPT="application/json",
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertEqual(
+            response.json()["error"]["fields"]["student"][0]["code"],
+            "invalid_choice",
+        )
+        self.assertFalse(Payment.objects.exists())
 
     def test_payment_and_adjustment_forms_require_csrf_and_work_with_a_valid_token(
         self,

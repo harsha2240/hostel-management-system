@@ -25,9 +25,7 @@ def save_audited_formset(request, formset):
     instances = formset.save(commit=False)
     for obj in instances:
         action = (
-            AuditEvent.Action.CREATE
-            if obj._state.adding
-            else AuditEvent.Action.UPDATE
+            AuditEvent.Action.CREATE if obj._state.adding else AuditEvent.Action.UPDATE
         )
         obj.save()
         record_event(user=request.user, action=action, record=obj)

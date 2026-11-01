@@ -6,9 +6,15 @@ from accounts.models import User
 
 class DashboardNavigationSmokeTests(TestCase):
     def setUp(self):
-        self.admin = User.objects.create_user(username="nav-admin", role=User.Role.ADMIN)
-        self.warden = User.objects.create_user(username="nav-warden", role=User.Role.WARDEN)
-        self.student = User.objects.create_user(username="nav-student", role=User.Role.STUDENT)
+        self.admin = User.objects.create_user(
+            username="nav-admin", role=User.Role.ADMIN
+        )
+        self.warden = User.objects.create_user(
+            username="nav-warden", role=User.Role.WARDEN
+        )
+        self.student = User.objects.create_user(
+            username="nav-student", role=User.Role.STUDENT
+        )
 
     def assert_pages_load(self, user, route_names):
         self.client.force_login(user)

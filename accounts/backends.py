@@ -42,5 +42,5 @@ class LockoutBackend(ModelBackend):
                 if current.failed_attempts >= self.attempts:
                     current.locked_until = timezone.now() + self.duration
                     current.failed_attempts = 0
-            current.save(update_fields=['failed_attempts', 'locked_until'])
+            current.save(update_fields=["failed_attempts", "locked_until"])
             return current if password_matches else None

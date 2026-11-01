@@ -5,11 +5,11 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from hms.decorators import staff_required as staff_only
+from hms.decorators import staff_required
 from hms.http import api_error, request_data, wants_json
-from hms.responses import validation_response
+from hms.responses import form_error_response, validation_response
 from hostels.models import Bed
 from students.models import Student
 
@@ -39,17 +39,7 @@ def form_error(request, form, error=None):
             return validation_response(error)
         form.add_error(None, "; ".join(error.messages))
     if wants_json(request):
-        missing = any(
-            error.code == "invalid_choice"
-            for errors in form.errors.as_data().values()
-            for error in errors
-        )
-        return api_error(
-            "Please correct the highlighted fields.",
-            fields=form.errors.get_json_data(),
-            code="NOT_FOUND" if missing else "VALIDATION_ERROR",
-            status=404 if missing else 400,
-        )
+        return form_error_response(form, missing_fields=("student", "bed", "new_bed"))
     return None
 
 
@@ -61,7 +51,7 @@ def available_beds():
     )
 
 
-@staff_only
+@staff_required
 @require_http_methods(["GET", "POST"])
 def allocation_list(request):
     if request.method == "POST":
@@ -91,7 +81,7 @@ def allocation_list(request):
     )
 
 
-@staff_only
+@staff_required
 @require_http_methods(["GET", "POST"])
 def allocation_create(request):
     form = AllocationForm()
@@ -137,7 +127,7 @@ def allocation_create(request):
     )
 
 
-@staff_only
+@staff_required
 @require_http_methods(["GET", "POST"])
 def allocation_transfer(request, pk):
     allocation = get_object_or_404(
@@ -174,7 +164,7 @@ def allocation_transfer(request, pk):
     )
 
 
-@staff_only
+@staff_required
 @require_http_methods(["GET", "POST"])
 def allocation_release(request, pk):
     allocation = get_object_or_404(
@@ -209,8 +199,8 @@ def allocation_release(request, pk):
     )
 
 
-@staff_only
-@require_http_methods(["GET"])
+@staff_required
+@require_GET
 def allocation_history(request, pk):
     student = get_object_or_404(Student, pk=pk)
     allocations = student.allocations.select_related("student", "bed__room__hostel")
@@ -228,7 +218,7 @@ def allocation_history(request, pk):
     )
 
 
-@staff_only
+@staff_required
 @require_POST
 def allocation_complete(request, pk):
     return allocation_release(request, pk)

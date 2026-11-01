@@ -10,6 +10,8 @@
 *.mmd text eol=lf
 *.svg text eol=lf
 *.txt text eol=lf
+# Preserve the exact bytes of migration history, including legacy line endings.
+**/migrations/*.py -text
 *.docx binary
 *.pdf binary
 *.png binary

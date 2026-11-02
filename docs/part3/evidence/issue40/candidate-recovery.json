@@ -1,0 +1,263 @@
+{
+  "case": "TC-OPS-01",
+  "status": "PARTIAL_PENDING_POST_FIX_LOGICAL_RESTORE_RERUN",
+  "assembled_from_preserved_operation_artifacts_after_cleanup_refusal": true,
+  "source_commit": "265d24fe9dc1a7346e8e3210349ee3fda885d26f",
+  "working_tree_was_dirty": true,
+  "initial_source_script_sha256": "d0ac183e87d69a4b2c13f9ffcd7660ce1c85cd7a172cae56928029c2ae26d0ab",
+  "initial_runner_script_sha256": "bfc5b2c95cff62a468d9308c5bc3e97f64b2cd66822aefe62e7df926388c3160",
+  "scope": "isolated populated synthetic recovery plus separately observed live read-only daily hms backup",
+  "live_application_database_seeded_or_restored": false,
+  "initial_cleanup_failure": {
+    "status": "FAIL",
+    "error_type": "SafetyError",
+    "reason": "Original runner required mysqld pidfile PID to equal Popen launcher PID; Windows mysqld monitor directly owned a separate child server PID.",
+    "recorded_failure_local_time": "2026-11-02T09:22:02+05:30",
+    "launcher_pid": 22016,
+    "server_pid": 10440,
+    "remediation": "Validated exact executable, direct-parent relationship, server port58485 and resolved private datadir; authenticated SHUTDOWN only on sandbox. Both processes disappeared and private pidfile removed.",
+    "owned_sandbox_stopped_after_manual_remediation": true
+  },
+  "daily_schedule_limitation": "Interactive current-user task: Windows session, computer and MySQL must be available; StartWhenAvailable retries missed trigger when available.",
+  "sandbox_daily_schedule": {
+    "exists": true,
+    "task_name": "HMS-Issue40-DailyBackup",
+    "state": "Running",
+    "last_run": "2026-11-02T09:20:44.0000000+05:30",
+    "last_result": 0,
+    "next_run": "2026-11-03T09:20:44.0000000+05:30",
+    "daily_interval": "1",
+    "registration_observed_at": "2026-11-02T03:49:42.396538+00:00",
+    "backup_completed_at": "2026-11-02T03:50:49.681093+00:00",
+    "observed_natural_trigger": true,
+    "action_sha256": "73afe4f6137d97e97f77276972a42791d9af9c987a6bd96c2149981d43c6ecaa"
+  },
+  "sandbox_backup": {
+    "started_at": "2026-11-02T03:50:48.498541+00:00",
+    "completed_at": "2026-11-02T03:50:49.681093+00:00",
+    "dump_sha256": "f553798669f9df11c7c13a0701d8f2df45786ebed2d6e12e2f1f80ebc09947b3",
+    "dump_bytes": 29912,
+    "source_quiescent_during_backup": true,
+    "table_row_counts": {
+      "accounts_user": 1,
+      "accounts_user_groups": 0,
+      "accounts_user_user_permissions": 0,
+      "allocations_allocation": 2,
+      "audit_auditevent": 3,
+      "auth_group": 0,
+      "auth_group_permissions": 0,
+      "auth_permission": 56,
+      "django_admin_log": 0,
+      "django_content_type": 14,
+      "django_migrations": 29,
+      "django_session": 0,
+      "hostels_bed": 4,
+      "hostels_hostel": 1,
+      "hostels_room": 1,
+      "payments_payment": 2,
+      "payments_receiptsequence": 1,
+      "students_student": 3
+    }
+  },
+  "live_daily_schedule": {
+    "exists": true,
+    "task_name": "HMS-Issue40-DailyBackup",
+    "state": "Ready",
+    "last_run": "2026-11-02T09:21:55.0000000+05:30",
+    "last_result": 0,
+    "next_run": "2026-11-03T09:21:55.0000000+05:30",
+    "daily_interval": "1",
+    "registration_observed_at": "2026-11-02T03:50:54.075669+00:00",
+    "backup_completed_at": "2026-11-02T03:51:57.841234+00:00",
+    "observed_natural_trigger": true,
+    "action_sha256": "a68620f97a62323bf85355ccf6450712876d9c737b94aa02ab09d68335d1656c"
+  },
+  "live_backup": {
+    "started_at": "2026-11-02T03:51:56.617832+00:00",
+    "completed_at": "2026-11-02T03:51:57.841234+00:00",
+    "dump_sha256": "6d6a20ad1db53d5b62faefbc9620a75ad96ec6b4620c0496f14e9bef20217392",
+    "dump_bytes": 28242,
+    "source_quiescent_during_backup": true,
+    "table_row_counts": {
+      "accounts_user": 0,
+      "accounts_user_groups": 0,
+      "accounts_user_user_permissions": 0,
+      "allocations_allocation": 0,
+      "audit_auditevent": 0,
+      "auth_group": 0,
+      "auth_group_permissions": 0,
+      "auth_permission": 56,
+      "django_admin_log": 0,
+      "django_content_type": 14,
+      "django_migrations": 29,
+      "django_session": 1,
+      "hostels_bed": 0,
+      "hostels_hostel": 0,
+      "hostels_room": 0,
+      "payments_payment": 0,
+      "payments_receiptsequence": 1,
+      "students_student": 0
+    }
+  },
+  "initial_populated_recovery": {
+    "case": "TC-OPS-01",
+    "operation": "populated separate-database restore",
+    "observed_at": "2026-11-02T03:50:51.949003+00:00",
+    "backup_completed_at": "2026-11-02T03:50:49.681093+00:00",
+    "backup_age_seconds": 1.131,
+    "source": "hms",
+    "restore_target": "test_hms",
+    "source_unchanged": true,
+    "all_table_counts_rows_and_schema_match": true,
+    "required_populated_tables": [
+      "students_student",
+      "hostels_bed",
+      "allocations_allocation",
+      "payments_payment",
+      "audit_auditevent"
+    ],
+    "tables": {
+      "accounts_user": {
+        "rows": 1,
+        "rows_sha256": "1a48fa6120e4abf326fbd0d788116105ecffa9ffebbef9dbe11deae9eac30516",
+        "schema_sha256": "259307f80229133c9fcd404d4fd4f7a2649409281d4b617958cf09dcb35aea44"
+      },
+      "accounts_user_groups": {
+        "rows": 0,
+        "rows_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "schema_sha256": "35f61cab6d52a21e354b663640f63011ab5d0aa34b975c9993a2fb36c5d9cbc2"
+      },
+      "accounts_user_user_permissions": {
+        "rows": 0,
+        "rows_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "schema_sha256": "b4007824df034588404ff1c8fe01c62ec6da83018aba876b103642c3d6dcf342"
+      },
+      "allocations_allocation": {
+        "rows": 2,
+        "rows_sha256": "b343f6bc86803c0393a2e833bd3aed1ad99e2fb09c3360271d047dd86da303b5",
+        "schema_sha256": "4bab000eade415cdfb33e5ced4ff4ae0785ac441f903378a9a2afc99b138da8a"
+      },
+      "audit_auditevent": {
+        "rows": 3,
+        "rows_sha256": "0ed86e9c713a7661538a2d73ed103a7d2c641eef6f24f6b98a05980ddb7135a1",
+        "schema_sha256": "a431df58a851e467273c1bf9ec1496d02665849157a6c1277c420ce8477965ad"
+      },
+      "auth_group": {
+        "rows": 0,
+        "rows_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "schema_sha256": "0e08d131261d7a2411634f0ccc8dcb9d3888f0ccddbd29c28b668249086c10ac"
+      },
+      "auth_group_permissions": {
+        "rows": 0,
+        "rows_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "schema_sha256": "448969d3c019125107f09989e34a8b2be8a5d0c9a4617e9f7d9ec066bbdb6c03"
+      },
+      "auth_permission": {
+        "rows": 56,
+        "rows_sha256": "9a5fcf43efe5a3a2ad69ed9e4db5aa9f17d60af9e37ef25077b20dafd84d3f39",
+        "schema_sha256": "7e93cfe875f894fb1311ecb1481534e440eb44912f146b41a95c333c5b93d09a"
+      },
+      "django_admin_log": {
+        "rows": 0,
+        "rows_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "schema_sha256": "5d1370024917fc3ffea823935ae44288b0741c5c34081c78cbf6d59edaf8ee6a"
+      },
+      "django_content_type": {
+        "rows": 14,
+        "rows_sha256": "87525d5e1b92e56d7a71557c0a0c7b10eeb3d0c03f5471eaafed2fdd0d379510",
+        "schema_sha256": "a018a36838919c439bfebd036972e5510088989d21129f34db4fc5981e75e4df"
+      },
+      "django_migrations": {
+        "rows": 29,
+        "rows_sha256": "6a0e7d6b3c3d416a8c66f5622b942319072d7aa06d91b8ad613a6f1439c5ae47",
+        "schema_sha256": "aafde652bb237c58744d30886204168cacc340b2224a1db1f18d34a5a426c19d"
+      },
+      "django_session": {
+        "rows": 0,
+        "rows_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "schema_sha256": "f01240b82cefbb1d02f49e857ffbd7d7943407fa47c0bfe85675432d77cb317d"
+      },
+      "hostels_bed": {
+        "rows": 4,
+        "rows_sha256": "9fbcf61c221ed041c0f6e9b47f67cdd59798f350d158ebb12f80f4c10d3696b9",
+        "schema_sha256": "a0c4ca013f7418f24dbd633d6208e2144242d38af5b05e566032e93dc6694128"
+      },
+      "hostels_hostel": {
+        "rows": 1,
+        "rows_sha256": "94396f7bfbee61935242e59201b19362b340828e4864d056ca2f813e6eb3285b",
+        "schema_sha256": "bf1fc03e4e259b681026ff3963dddf0aa3b2a0b3686fd521507895bca053e153"
+      },
+      "hostels_room": {
+        "rows": 1,
+        "rows_sha256": "2a56325ae548d017a54a947704d0c1318b323e866cd8f5a52582660db2cc40a9",
+        "schema_sha256": "a28fb5243fad57d798b173cb826c62e8a2fa40d8d1e502c89f57505d1debdd63"
+      },
+      "payments_payment": {
+        "rows": 2,
+        "rows_sha256": "d1ef3985333b13eebd7117f433cd01f67ccdc63acf1877f4c9733779e9dd8791",
+        "schema_sha256": "fb54843d707b2ed4e7b92b6730ae8f95c62417c1cc9b78922e0664139ff5fd25"
+      },
+      "payments_receiptsequence": {
+        "rows": 1,
+        "rows_sha256": "d2ead2313b3d9cf64dc379428ef0f591f613dfd5c84175124fbb16196ea7af44",
+        "schema_sha256": "d345383dfa2ea9157b7ef01d95264c51a1bf1ac2418feacb77ab283c2d1e7d03"
+      },
+      "students_student": {
+        "rows": 3,
+        "rows_sha256": "06094f8ce8b40584f82d948e35f38a17ffdbd2acdde1b0d557b88db84f430214",
+        "schema_sha256": "50f2af9b9bab50e18499fbae87541a422f4579140e970032d0d7e460a42da9b3"
+      }
+    },
+    "dump_sha256": "f553798669f9df11c7c13a0701d8f2df45786ebed2d6e12e2f1f80ebc09947b3",
+    "data_loss_at_comparison": "none; all rows and schema digests match the unchanged source",
+    "recovery_status": "PASS",
+    "daily_schedule_status": "requires separate real Task Scheduler evidence"
+  },
+  "assembled_at": "2026-11-02T03:55:05.261493+00:00",
+  "tool_versions": {
+    "python": "3.14.7",
+    "django": "5.2.18",
+    "mysql_server": "8.4.9",
+    "mysql_client": "8.4.9",
+    "mysqldump": "8.4.9",
+    "platform": "Windows 11 build 26200"
+  },
+  "reproduction_commands": [
+    "python scripts/part3/run_issue40_recovery.py --private-dir <new-private-directory-outside-repository>",
+    "python scripts/part3/run_issue40_recovery.py --resume-private-dir <existing-private-directory>",
+    "python -m unittest discover -s scripts/part3 -p test_issue40_recovery_safety.py -v"
+  ],
+  "test_data_recipe": {
+    "students": "3 synthetic tests.factories.make_student records numbered700-702",
+    "actors": "one synthetic warden with ephemeral random password",
+    "hostel": "one Boys hostel, one capacity4 room with INR10000.00 fee",
+    "beds": "4 beds: one Occupied, two Available, one Maintenance",
+    "allocations": "2 records: one active and one completed via application allocate/release operations",
+    "payments": "INR1000.00 original Cash payment and INR-100.00 reasoned Cash adjustment; receiptsR00000000001,R00000000002",
+    "audit": "3 allocation/release events",
+    "schema": "all29 migrations applied into separate MySQL sandbox before data creation"
+  },
+  "backup_and_availability_limits": [
+    "Live hms currently has no domain records; no live data was seeded or restored.",
+    "Populated backup and recovery use an independently initialized MySQL8.4.9 instance with private datadir and non3306 loopback port.",
+    "Current-user Task Scheduler job is real and naturally observed; it requires a logged-in Windows user and available computer/MySQL. One successful observation does not establish long-term job or host availability.",
+    "No credentials, dumps, private connection files, raw task action paths or row values are published."
+  ],
+  "offline_safety_verification": {
+    "status": "PASS",
+    "methods": 20,
+    "failures": 0,
+    "errors": 0,
+    "command": "python -S -m unittest discover -s scripts/part3 -p test_issue40_recovery_safety.py -v",
+    "site_packages_disabled": true,
+    "database_process_scheduler_operations": "mocked; no live operations",
+    "python_runtime": "3.14.7 on Windows",
+    "python_3_11_syntax_check": "ast.parse(feature_version=(3,11)) passed for all3 Python harness files",
+    "observed_at": "2026-11-02T04:00:56.159080+00:00",
+    "source_sha256": {
+      "backup_issue40.py": "1e38569031682ebef5117cb85f6c92145eadd2b4a36fa7144a558cd82c123de7",
+      "run_issue40_recovery.py": "995654f432baab0b67b28be623ce832249842369f7f3b8907250ad15c94518c5",
+      "test_issue40_recovery_safety.py": "c5f34684ef06f3ffc90787b80f237a56cde4230c3a271ffccfc47e28f24713dc"
+    }
+  }
+}

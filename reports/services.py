@@ -13,7 +13,9 @@ def occupancy_rows(hostel_id=None):
     if hostel_id is not None:
         hostels = hostels.filter(pk=hostel_id)
         beds = beds.filter(room__hostel_id=hostel_id)
-    active = Allocation.objects.filter(bed_id=OuterRef("pk"), status="Active")
+    active = Allocation.objects.filter(
+        bed_id=OuterRef("pk"), status=Allocation.AllocationStatus.ACTIVE
+    )
     counts = (
         beds.annotate(has_active=Exists(active))
         .order_by()

@@ -3,6 +3,12 @@ from django import forms
 from .models import Hostel, Room
 
 
+class BedFilterForm(forms.Form):
+    hostel = forms.IntegerField(required=False, min_value=1, max_value=2**63 - 1)
+    # The configured MySQL backend stores room floors as unsigned SMALLINTs.
+    floor = forms.IntegerField(required=False, min_value=0, max_value=65535)
+
+
 class HostelForm(forms.ModelForm):
     class Meta:
         model = Hostel

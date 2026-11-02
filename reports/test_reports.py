@@ -186,7 +186,16 @@ class ReportTests(TestCase):
     def test_empty_reports_and_invalid_filters_formats_and_methods(self):
         self.assertEqual(self.rows("payment-status-report", hostel=self.empty.pk), [])
         for name in ("occupancy-report", "payment-status-report"):
-            for identifier in ("bad", "-1", "0", "1.5", "9" * 100, "١"):
+            for identifier in (
+                "bad",
+                "-1",
+                "0",
+                "1.5",
+                "9" * 100,
+                "9" * 5000,
+                "0" * 5000,
+                "١",
+            ):
                 with self.subTest(name=name, identifier=identifier):
                     self.assertEqual(
                         self.client.get(
@@ -210,6 +219,14 @@ class ReportTests(TestCase):
         self.assertEqual(
             self.csv_rows("occupancy-report", hostel=self.empty.pk)[0]["Occupancy %"],
             "0.00",
+        )
+
+    def test_numeric_hostel_filter_accepts_leading_zeros(self):
+        identifier = "0" * 5000 + str(self.room.hostel_id)
+
+        self.assertEqual(
+            self.rows("occupancy-report", hostel=identifier),
+            occupancy_rows(self.room.hostel_id),
         )
 
     def test_reports_landing_redirects_to_occupancy_report(self):

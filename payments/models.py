@@ -93,11 +93,14 @@ class Payment(models.Model):
             raise ValidationError({"date": "Payment date cannot be in the future."})
         if isinstance(self.adjustment_reason, str):
             self.adjustment_reason = self.adjustment_reason.strip()
-        if isinstance(self.amount, Decimal) and self.amount.is_finite():
-            if self.amount == 0 or (not self.adjustment_of_id and self.amount < 0):
-                raise ValidationError(
-                    {"amount": "Enter a positive payment or a nonzero adjustment."}
-                )
+        if (
+            isinstance(self.amount, Decimal)
+            and self.amount.is_finite()
+            and (self.amount == 0 or (not self.adjustment_of_id and self.amount < 0))
+        ):
+            raise ValidationError(
+                {"amount": "Enter a positive payment or a nonzero adjustment."}
+            )
         if bool(self.adjustment_of_id) != bool(self.adjustment_reason):
             raise ValidationError(
                 {

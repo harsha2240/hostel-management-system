@@ -8,7 +8,9 @@
   <h1>Welcome to HMS</h1>
   <p class="muted">Sign in to continue to your HMS workspace.</p>
   <p class="muted">New here? Ask your hostel administrator to create an account.</p>
-  {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+  {% if error %}
+  <div class="notice error" role="alert">{{ error }}</div>
+  {% endif %}
   <form method="post">
     {% csrf_token %}
     <div class="form-field">

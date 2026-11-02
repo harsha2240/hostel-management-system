@@ -1,9 +1,21 @@
-{% if form.non_field_errors %}<div class="notice error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
-{% for field in form %}
-<div class="form-field">
-  <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span aria-label="required">*</span>{% endif %}</label>
+{% if form.non_field_errors %}
+<div class="notice error" role="alert">{{ form.non_field_errors }}</div>
+{% endif %}
+{% for field in form.hidden_fields %}
   {{ field }}
-  {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-  {% if field.errors %}<div class="field-errors" role="alert">{{ field.errors }}</div>{% endif %}
+  {% if field.errors %}
+  <div class="notice error" role="alert">{{ field.errors }}</div>
+  {% endif %}
+{% endfor %}
+{% for field in form.visible_fields %}
+<div class="form-field">
+  <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span aria-hidden="true">*</span>{% endif %}</label>
+  {{ field }}
+  {% if field.help_text %}
+  <div class="helptext"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text }}</div>
+  {% endif %}
+  {% if field.errors %}
+  <div class="field-errors" role="alert">{{ field.errors }}</div>
+  {% endif %}
 </div>
 {% endfor %}

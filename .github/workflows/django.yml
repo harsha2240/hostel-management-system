@@ -54,10 +54,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -81,12 +81,15 @@ jobs:
       - name: Apply migrations to a fresh application database
         run: python manage.py migrate --noinput
 
-      - name: Check configuration, migrations, tests and branch coverage
+      - name: Check lint, configuration, migrations, tests and branch coverage
         run: python scripts/run_checks.py --output-dir test-results/ci
+
+      - name: Check backup and recovery safety without external operations
+        run: python -m unittest discover -s scripts/part3 -p test_issue40_recovery_safety.py -v
 
       - name: Save test evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: hms-test-evidence-py${{ matrix.python-version }}-${{ github.sha }}
           path: test-results/ci/

@@ -1,20 +1,46 @@
 {% extends "base.html" %}
+
 {% block title %}Receipt {{ payment.receipt_no }}{% endblock %}
+
 {% block content %}
-<div class="page-heading"><h1>{% if payment.adjustment_of_id %}Adjustment receipt{% else %}Payment receipt{% endif %}</h1><a class="button" href="{% url 'payment-receipt-pdf' payment.receipt_no %}">Download PDF</a></div>
+<div class="page-heading">
+  <h1>{% if payment.adjustment_of_id %}Adjustment receipt{% else %}Payment receipt{% endif %}</h1>
+  <a class="button" href="{% url 'payment-receipt-pdf' payment.receipt_no %}">Download PDF</a>
+</div>
 <article class="card">
   <h2>{{ payment.receipt_no }}</h2>
   <dl>
-    <dt>Student</dt><dd>{{ payment.student }}</dd>
-    <dt>Amount (INR)</dt><dd>{{ payment.amount|floatformat:2 }}</dd>
-    <dt>Payment date</dt><dd>{{ payment.date|date:"d-m-Y" }}</dd>
-    <dt>Mode</dt><dd>{{ payment.mode }}</dd>
-    <dt>Reference</dt><dd>{{ payment.reference|default:"None" }}</dd>
-    {% if payment.adjustment_of_id %}<dt>Adjusts receipt</dt><dd><a href="{% url 'payment-receipt' payment.adjustment_of.receipt_no %}">{{ payment.adjustment_of.receipt_no }}</a></dd><dt>Reason</dt><dd>{{ payment.adjustment_reason }}</dd>{% endif %}
+    <dt>Student</dt>
+    <dd>{{ payment.student }}</dd>
+    <dt>Amount (INR)</dt>
+    <dd>{{ payment.amount|floatformat:2 }}</dd>
+    <dt>Payment date</dt>
+    <dd>{{ payment.date|date:"d-m-Y" }}</dd>
+    <dt>Mode</dt>
+    <dd>{{ payment.mode }}</dd>
+    <dt>Reference</dt>
+    <dd>{{ payment.reference|default:"None" }}</dd>
+    {% if payment.adjustment_of_id %}
+    <dt>Adjusts receipt</dt>
+    <dd><a href="{% url 'payment-receipt' payment.adjustment_of.receipt_no %}">{{ payment.adjustment_of.receipt_no }}</a></dd>
+    <dt>Reason</dt>
+    <dd>{{ payment.adjustment_reason }}</dd>
+    {% endif %}
   </dl>
   <a href="{% url 'student-payment-status' payment.student_id %}">View student payment status</a>
-  {% if not payment.adjustment_of_id %}<p><a href="{% url 'payment-adjust' payment.receipt_no %}">Record a correction</a></p>{% endif %}
+  {% if not payment.adjustment_of_id %}
+  <p><a href="{% url 'payment-adjust' payment.receipt_no %}">Record a correction</a></p>
+  {% endif %}
 </article>
-{% if adjustments %}<section class="card"><h2>Adjustments</h2><ul>{% for adjustment in adjustments %}<li><a href="{% url 'payment-receipt' adjustment.receipt_no %}">{{ adjustment.receipt_no }}</a>: INR {{ adjustment.amount|floatformat:2 }} — {{ adjustment.adjustment_reason }}</li>{% endfor %}</ul></section>{% endif %}
+{% if adjustments %}
+<section class="card">
+  <h2>Adjustments</h2>
+  <ul>
+    {% for adjustment in adjustments %}
+    <li><a href="{% url 'payment-receipt' adjustment.receipt_no %}">{{ adjustment.receipt_no }}</a>: INR {{ adjustment.amount|floatformat:2 }} — {{ adjustment.adjustment_reason }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 <a href="{% url 'payment-list' %}">Back to payments</a>
 {% endblock %}

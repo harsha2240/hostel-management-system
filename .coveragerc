@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = accounts,allocations,audit,hms,hostels,payments,reports,students
+source = accounts,allocations,audit,hms,hostels,payments,reports,scripts,students
 omit =
     */migrations/*
     */tests.py

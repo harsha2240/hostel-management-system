@@ -1,60 +1,22 @@
-from datetime import date
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import User
 from allocations.models import Allocation
 from audit.models import AuditEvent
-from hostels.models import Bed, Hostel, Room
-from students.models import Student
+from hostels.models import Bed
+from tests.factories import make_room, make_student
 
 
 class AllocationModelTests(TestCase):
     def setUp(self):
-        self.student1 = Student.objects.create(
-            student_id="PES1234567890",
-            name="Student One",
-            date_of_birth=date(2005, 5, 15),
-            gender=Student.Gender.MALE,
-            course="Computer Science",
-            year=2,
-            mobile="9876543210",
-            email="student1@example.com",
-            guardian_name="Guardian One",
-            guardian_mobile="9876543211",
-        )
-
-        self.student2 = Student.objects.create(
-            student_id="PES1234567891",
-            name="Student Two",
-            date_of_birth=date(2005, 6, 15),
-            gender=Student.Gender.MALE,
-            course="Computer Science",
-            year=2,
-            mobile="9876543212",
-            email="student2@example.com",
-            guardian_name="Guardian Two",
-            guardian_mobile="9876543213",
-        )
-
-        self.hostel = Hostel.objects.create(
-            name="Test Boys Hostel",
-            hostel_type=Hostel.HostelType.BOYS,
-        )
-
-        self.room = Room.objects.create(
-            hostel=self.hostel,
-            room_number="101",
-            floor=1,
-            room_type=Room.RoomType.DOUBLE,
-            capacity=2,
-        )
-
-        self.bed1 = self.room.beds.get(label="101-A")
-        self.bed2 = self.room.beds.get(label="101-B")
+        self.student1 = make_student()
+        self.student2 = make_student(2)
+        self.bed1, self.bed2 = make_room().beds.all()
 
     def test_active_allocation_occupies_bed(self):
         allocation = Allocation(
@@ -112,7 +74,7 @@ class AllocationModelTests(TestCase):
         )
 
         allocation.status = Allocation.AllocationStatus.COMPLETED
-        allocation.vacated_on = date.today()
+        allocation.vacated_on = timezone.localdate()
         allocation.save()
 
         self.bed1.refresh_from_db()
@@ -130,53 +92,27 @@ class AllocationModelTests(TestCase):
         self.bed1.save(update_fields=["status"])
 
         allocation.status = Allocation.AllocationStatus.COMPLETED
-        allocation.vacated_on = date.today()
+        allocation.vacated_on = timezone.localdate()
         allocation.save()
 
         self.bed1.refresh_from_db()
         self.assertEqual(self.bed1.status, Bed.BedStatus.MAINTENANCE)
 
+
 class AllocationViewTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
             username="allocation_admin",
-            password="TestPassword123!",
             role=User.Role.ADMIN,
         )
 
         self.student_user = User.objects.create_user(
             username="allocation_student",
-            password="TestPassword123!",
             role=User.Role.STUDENT,
         )
 
-        self.student = Student.objects.create(
-            student_id="PES9876543210",
-            name="Allocation Test Student",
-            date_of_birth=date(2005, 5, 15),
-            gender=Student.Gender.MALE,
-            course="Computer Science",
-            year=2,
-            mobile="9876543210",
-            email="allocation_student@example.com",
-            guardian_name="Test Guardian",
-            guardian_mobile="9876543211",
-        )
-
-        self.hostel = Hostel.objects.create(
-            name="Allocation View Hostel",
-            hostel_type=Hostel.HostelType.BOYS,
-        )
-
-        self.room = Room.objects.create(
-            hostel=self.hostel,
-            room_number="201",
-            floor=2,
-            room_type=Room.RoomType.DOUBLE,
-            capacity=2,
-        )
-
-        self.bed = self.room.beds.get(label="201-A")
+        self.student = make_student()
+        self.bed = make_room("201").beds.get(label="201-A")
 
     def test_admin_can_view_allocation_list(self):
         self.client.force_login(self.admin)
@@ -215,7 +151,7 @@ class AllocationViewTests(TestCase):
             {
                 "student": self.student.pk,
                 "bed": self.bed.pk,
-                "allocated_on": "2026-10-23",
+                "allocated_on": timezone.localdate().isoformat(),
             },
         )
 
@@ -240,15 +176,17 @@ class AllocationViewTests(TestCase):
     def test_allocation_creation_rolls_back_if_audit_event_fails(self):
         self.client.force_login(self.admin)
 
-        with patch(
-            "allocations.services.record_event",
-            side_effect=RuntimeError("audit write failed"),
+        with (
+            patch(
+                "allocations.services.record_event",
+                side_effect=RuntimeError("audit write failed"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                self.client.post(
-                    reverse("allocation-create"),
-                    {"student": self.student.pk, "bed": self.bed.pk},
-                )
+            self.client.post(
+                reverse("allocation-create"),
+                {"student": self.student.pk, "bed": self.bed.pk},
+            )
 
         self.assertFalse(Allocation.objects.filter(student=self.student).exists())
         self.bed.refresh_from_db()
@@ -261,14 +199,16 @@ class AllocationViewTests(TestCase):
             bed=self.bed,
         )
 
-        with patch(
-            "allocations.services.record_event",
-            side_effect=RuntimeError("audit write failed"),
+        with (
+            patch(
+                "allocations.services.record_event",
+                side_effect=RuntimeError("audit write failed"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                self.client.post(
-                    reverse("allocation-complete", args=[allocation.pk]),
-                )
+            self.client.post(
+                reverse("allocation-complete", args=[allocation.pk]),
+            )
 
         allocation.refresh_from_db()
         self.assertEqual(allocation.status, Allocation.AllocationStatus.ACTIVE)

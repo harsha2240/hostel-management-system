@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+*.py text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.csv text eol=lf
+*.mmd text eol=lf
+*.svg text eol=lf
+*.txt text eol=lf
+# Preserve the exact bytes of migration history, including legacy line endings.
+**/migrations/*.py -text
+*.docx binary
+*.pdf binary
+*.png binary

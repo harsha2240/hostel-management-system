@@ -19,4 +19,16 @@
 
 ## Traceability
 
-The diagrams are mapped to SRS requirements and SAD components. Editable diagram sources are kept in `diagrams/` as Mermaid (`.mmd`); the PNG files are the figures used in the SRS and SAD.
+The diagrams are mapped to SRS requirements and SAD components. Editable diagram
+sources are kept in `diagrams/` as Mermaid (`.mmd`), with rendered PNG figures
+alongside them. These figures accompany the formal documents as separate files.
+The SRS embeds UC-01; the SAD embeds CD-01, SD-01 and SD-02.
+
+These are the original Part 1 design artifacts. Their Bootstrap/MySQL 8.0
+labels and illustrative request/transaction sequences describe that baseline;
+the current application uses repository CSS and is verified on MySQL 8.4.
+For implemented routes, lock ordering and transactional audit behavior, consult
+the source and [`docs/SPRINT2.md`](docs/SPRINT2.md). In particular, allocation
+audit entries commit within the allocation transaction, rather than afterward
+as the original sequence diagram suggests. Preserve DOCX/PDF/PNG pairs together
+when revising the formal design package.

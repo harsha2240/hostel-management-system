@@ -6,7 +6,11 @@
 <section class="card narrow">
   <p class="eyebrow">Administration</p>
   <h1>Edit {{ account.username }}</h1>
-  <form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Save changes</button></form>
+  <form method="post">
+    {% csrf_token %}
+    {% include "includes/form.html" %}
+    <button type="submit">Save changes</button>
+  </form>
   <p><a href="{% url 'user-management' %}">Cancel</a></p>
 </section>
 {% endblock %}

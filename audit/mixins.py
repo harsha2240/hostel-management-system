@@ -9,10 +9,10 @@ class AuditedAdminMixin:
         action = AuditEvent.Action.UPDATE if change else AuditEvent.Action.CREATE
         if change:
             previous = type(obj).objects.get(pk=obj.pk)
-            was_active = getattr(previous, 'is_active', None) is True
-            is_active = getattr(obj, 'is_active', None) is True
-            was_status_active = getattr(previous, 'status', None) == 'Active'
-            status_inactive = getattr(obj, 'status', None) == 'Inactive'
+            was_active = getattr(previous, "is_active", None) is True
+            is_active = getattr(obj, "is_active", None) is True
+            was_status_active = getattr(previous, "status", None) == "Active"
+            status_inactive = getattr(obj, "status", None) == "Inactive"
             if (was_active and not is_active) or (
                 was_status_active and status_inactive
             ):
@@ -33,6 +33,6 @@ class AuditedAdminMixin:
         super().log_change(request, obj, message)
         record_event(
             user=request.user,
-            action=getattr(obj, '_audit_action', AuditEvent.Action.UPDATE),
+            action=getattr(obj, "_audit_action", AuditEvent.Action.UPDATE),
             record=obj,
         )

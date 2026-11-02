@@ -1,7 +1,11 @@
-{% if page_obj.paginator.num_pages > 1 %}
-<nav class="pagination" aria-label="Pagination">
-  {% if page_obj.has_previous %}<a href="{% querystring page=page_obj.previous_page_number %}">Previous</a>{% endif %}
+{% if page_obj.paginator.num_pages > 1 or always_show %}
+<nav class="pagination" aria-label="{{ pagination_label|default:'Pagination' }}">
+  {% if page_obj.has_previous %}
+  <a{% if link_class %} class="{{ link_class }}"{% endif %} href="{% querystring page=page_obj.previous_page_number %}">Previous</a>
+  {% endif %}
   <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-  {% if page_obj.has_next %}<a href="{% querystring page=page_obj.next_page_number %}">Next</a>{% endif %}
+  {% if page_obj.has_next %}
+  <a{% if link_class %} class="{{ link_class }}"{% endif %} href="{% querystring page=page_obj.next_page_number %}">Next</a>
+  {% endif %}
 </nav>
 {% endif %}

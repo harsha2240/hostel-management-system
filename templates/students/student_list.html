@@ -4,7 +4,10 @@
 
 {% block content %}
 <div class="page-heading">
-  <div><p class="eyebrow">People</p><h1>Students</h1></div>
+  <div>
+    <p class="eyebrow">People</p>
+    <h1>Students</h1>
+  </div>
   <a class="button" href="{% url 'student-create' %}">Register a student</a>
 </div>
 <form method="get" class="card filters">
@@ -13,31 +16,52 @@
     <input type="search" id="q" name="q" value="{{ query }}" placeholder="Student ID, name, or hostel">
   </div>
   <button type="submit">Search</button>
-  {% if query %}<a class="button secondary" href="{% url 'student-list' %}">Clear</a>{% endif %}
+  {% if query %}
+  <a class="button secondary" href="{% url 'student-list' %}">Clear</a>
+  {% endif %}
 </form>
 <div class="table-wrap">
   <table>
-    <thead><tr><th>Student ID</th><th>Name</th><th>Course</th><th>Year</th><th>Mobile</th><th>Status</th><th>Actions</th></tr></thead>
+    <thead>
+      <tr>
+        <th scope="col">Student ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Course</th>
+        <th scope="col">Year</th>
+        <th scope="col">Mobile</th>
+        <th scope="col">Status</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
     <tbody>
       {% for student in page_obj %}
       <tr>
-        <td>{{ student.student_id }}</td><td>{{ student.name }}</td><td>{{ student.course }}</td><td>{{ student.year }}</td><td>{{ student.mobile }}</td>
+        <td>{{ student.student_id }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ student.course }}</td>
+        <td>{{ student.year }}</td>
+        <td>{{ student.mobile }}</td>
         <td><span class="badge {{ student.status }}">{{ student.status }}</span></td>
-        <td><div class="actions">
-          <a href="{% url 'student-update' student.pk %}">Edit</a>
-          <a href="{% url 'student-payment-status' student.pk %}">Payment status</a>
-          {% if student.status == "Active" %}
-          <form method="post" action="{% url 'student-deactivate' student.pk %}">{% csrf_token %}<button class="secondary" type="submit" onclick="return confirm('Deactivate this student?')">Deactivate</button></form>
-          {% endif %}
-        </div></td>
+        <td>
+          <div class="actions">
+            <a href="{% url 'student-update' student.pk %}">Edit</a>
+            <a href="{% url 'student-payment-status' student.pk %}">Payment status</a>
+            {% if student.status == "Active" %}
+            <form method="post" action="{% url 'student-deactivate' student.pk %}">
+              {% csrf_token %}
+              <button class="secondary" type="submit" onclick="return confirm('Deactivate this student?')">Deactivate</button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
       </tr>
-      {% empty %}<tr><td colspan="7">No students found. Try a different search, or register a student.</td></tr>{% endfor %}
+      {% empty %}
+      <tr>
+        <td colspan="7">No students found. Try a different search, or register a student.</td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>
-<nav class="pagination" aria-label="Student pages">
-  {% if page_obj.has_previous %}<a class="button secondary" href="?q={{ query|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
-  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-  {% if page_obj.has_next %}<a class="button secondary" href="?q={{ query|urlencode }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}
-</nav>
+{% include "includes/pagination.html" with pagination_label="Student pages" link_class="button secondary" always_show=True %}
 {% endblock %}

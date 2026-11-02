@@ -36,6 +36,81 @@ class AllocationWorkflowTests(TestCase):
     def create(self):
         return allocate(student=self.student, bed=self.bed, actor=self.actor)
 
+    def test_json_date_types_return_400_without_changing_allocations(self):
+        values = (123, True, ["2026-10-26"], {"day": 26})
+        before_audits = AuditEvent.objects.count()
+        for value in values:
+            with self.subTest(action="allocate", value=value):
+                response = self.client.post(
+                    reverse("allocation-list"),
+                    {
+                        "student_id": self.student.student_id,
+                        "bed_id": self.bed.pk,
+                        "allocated_on": value,
+                    },
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 400)
+                if isinstance(value, (int, bool)):
+                    self.assertEqual(
+                        response.json()["error"]["fields"]["allocated_on"][0]["code"],
+                        "invalid",
+                    )
+        self.assertFalse(Allocation.objects.exists())
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
+        original = self.create()
+        before_audits = AuditEvent.objects.count()
+        for value in values:
+            with self.subTest(action="release", value=value):
+                response = self.client.post(
+                    reverse("allocation-release", args=[original.pk]),
+                    {"vacate_date": value},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 400)
+                if isinstance(value, (int, bool)):
+                    self.assertEqual(
+                        response.json()["error"]["fields"]["vacate_date"][0]["code"],
+                        "invalid",
+                    )
+        original.refresh_from_db()
+        self.bed.refresh_from_db()
+        self.assertEqual(original.status, "Active")
+        self.assertEqual(self.bed.status, "Occupied")
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
+    def test_json_reference_types_cannot_select_a_different_integer_key(self):
+        before_audits = AuditEvent.objects.count()
+        for value in (self.bed.pk + 0.5, float(self.bed.pk), True, False):
+            with self.subTest(action="allocate", value=value):
+                response = self.client.post(
+                    reverse("allocation-list"),
+                    {"student_id": self.student.student_id, "bed_id": value},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertFalse(Allocation.objects.exists())
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
+        original = self.create()
+        before_audits = AuditEvent.objects.count()
+        for value in (self.other.pk + 0.5, float(self.other.pk), True, False):
+            with self.subTest(action="transfer", value=value):
+                response = self.client.post(
+                    reverse("allocation-transfer", args=[original.pk]),
+                    {"new_bed_id": value},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 404)
+        original.refresh_from_db()
+        self.other.refresh_from_db()
+        self.assertEqual(original.status, "Active")
+        self.assertEqual(self.other.status, "Available")
+        self.assertEqual(Allocation.objects.count(), 1)
+        self.assertEqual(AuditEvent.objects.count(), before_audits)
+
     def test_transfer_and_release_preserve_history_and_emit_actor_audit(self):
         original = self.create()
         successor = transfer(
@@ -121,12 +196,12 @@ class AllocationWorkflowTests(TestCase):
                 self.subTest(field=field),
                 self.assertRaises(IntegrityError),
                 transaction.atomic(),
+                connection.cursor() as cursor,
             ):
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        f"UPDATE allocations_allocation SET {field}=NULL WHERE id=%s",
-                        [allocation.pk],
-                    )
+                cursor.execute(
+                    f"UPDATE allocations_allocation SET {field}=NULL WHERE id=%s",
+                    [allocation.pk],
+                )
 
     def test_transfer_failure_rolls_back_both_beds_and_history(self):
         original = self.create()
@@ -153,22 +228,26 @@ class AllocationWorkflowTests(TestCase):
         self.assertFalse(AuditEvent.objects.filter(action="transfer").exists())
 
     def test_audit_failure_rolls_back_allocation_and_release(self):
-        with patch(
-            "allocations.services.record_event",
-            side_effect=RuntimeError("audit unavailable"),
+        with (
+            patch(
+                "allocations.services.record_event",
+                side_effect=RuntimeError("audit unavailable"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                self.create()
+            self.create()
         self.bed.refresh_from_db()
         self.assertEqual(self.bed.status, "Available")
         self.assertEqual(Allocation.objects.count(), 0)
         allocation = self.create()
-        with patch(
-            "allocations.services.record_event",
-            side_effect=RuntimeError("audit unavailable"),
+        with (
+            patch(
+                "allocations.services.record_event",
+                side_effect=RuntimeError("audit unavailable"),
+            ),
+            self.assertRaises(RuntimeError),
         ):
-            with self.assertRaises(RuntimeError):
-                release(allocation_id=allocation.pk, actor=self.actor)
+            release(allocation_id=allocation.pk, actor=self.actor)
         allocation.refresh_from_db()
         self.bed.refresh_from_db()
         self.assertEqual((allocation.status, self.bed.status), ("Active", "Occupied"))
@@ -251,6 +330,39 @@ class AllocationWorkflowTests(TestCase):
             ).status_code,
             302,
         )
+
+    def test_json_form_errors_preserve_reference_and_validation_status_codes(self):
+        response = self.client.post(
+            reverse("allocation-create"),
+            {"student_id": self.student.student_id, "bed_id": 999999},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertEqual(
+            response.json()["error"]["fields"]["bed"][0]["code"], "invalid_choice"
+        )
+
+        allocation = self.create()
+        response = self.client.post(
+            reverse("allocation-transfer", args=[allocation.pk]),
+            {"new_bed_id": 999999},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"]["code"], "NOT_FOUND")
+        self.assertIn("new_bed", response.json()["error"]["fields"])
+
+        response = self.client.post(
+            reverse("allocation-release", args=[allocation.pk]),
+            {},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"]["code"], "VALIDATION_ERROR")
+        self.assertIn("vacate_date", response.json()["error"]["fields"])
+        allocation.refresh_from_db()
+        self.assertEqual(allocation.status, "Active")
 
 
 class AllocationConcurrencyTests(TransactionTestCase):

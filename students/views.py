@@ -1,4 +1,3 @@
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -13,10 +12,11 @@ from accounts.models import User
 from allocations.models import Allocation
 from audit.models import AuditEvent
 from audit.services import record_event
-from .forms import StudentForm
-from .models import Student
 from payments.models import Payment
 from payments.services import payment_status_queryset, status_row
+
+from .forms import StudentForm
+from .models import Student
 
 
 def can_manage_students(user):
@@ -29,9 +29,7 @@ def can_manage_students(user):
 @login_required
 def student_list(request):
     if not can_manage_students(request.user):
-        return HttpResponseForbidden(
-            "You do not have permission to manage students."
-        )
+        return HttpResponseForbidden("You do not have permission to manage students.")
 
     query = request.GET.get("q", "").strip()
     students = Student.objects.all()
@@ -60,11 +58,9 @@ def student_list(request):
 @require_http_methods(["GET", "POST"])
 def student_create(request):
     if not can_manage_students(request.user):
-        return HttpResponseForbidden(
-            "You do not have permission to register students."
-        )
+        return HttpResponseForbidden("You do not have permission to register students.")
 
-    form = StudentForm(request.POST or None)
+    form = StudentForm(request.POST if request.method == "POST" else None)
 
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
@@ -91,12 +87,12 @@ def student_create(request):
 @require_http_methods(["GET", "POST"])
 def student_update(request, pk):
     if not can_manage_students(request.user):
-        return HttpResponseForbidden(
-            "You do not have permission to update students."
-        )
+        return HttpResponseForbidden("You do not have permission to update students.")
 
     student = get_object_or_404(Student, pk=pk)
-    form = StudentForm(request.POST or None, instance=student)
+    form = StudentForm(
+        request.POST if request.method == "POST" else None, instance=student
+    )
 
     form.fields["student_id"].disabled = True
     form.fields.pop("status")
@@ -141,11 +137,7 @@ def student_deactivate(request, pk):
     )
 
     allocation = (
-        Allocation.objects.select_related(
-            "bed",
-            "bed__room",
-            "bed__room__hostel",
-        )
+        Allocation.objects.select_related("bed__room__hostel")
         .filter(
             student=student,
             status=Allocation.AllocationStatus.ACTIVE,
@@ -185,15 +177,13 @@ def student_deactivate(request, pk):
 @require_GET
 def my_records(request):
     """Show only the student profile explicitly linked to this login."""
-    student = (
+    student = payment_status_queryset(
         Student.objects.filter(user_id=request.user.pk)
-        .select_related("user")
-        .first()
-    )
+    ).first()
     if student is None:
         return render(request, "students/my_records.html", {"student": None})
 
-    allocations = (
+    allocations = list(
         student.allocations.exclude(status=Allocation.AllocationStatus.CANCELLED)
         .select_related("bed__room__hostel")
         .order_by("-allocated_on", "-pk")
@@ -203,19 +193,21 @@ def my_records(request):
         .select_related("adjustment_of")
         .order_by("-date", "-pk")
     )
-    balance_student = payment_status_queryset(
-        Student.objects.filter(pk=student.pk)
-    ).get(pk=student.pk)
     return render(
         request,
         "students/my_records.html",
         {
             "student": student,
             "allocations": allocations,
-            "current_allocation": allocations.filter(
-                status=Allocation.AllocationStatus.ACTIVE
-            ).first(),
+            "current_allocation": next(
+                (
+                    allocation
+                    for allocation in allocations
+                    if allocation.status == Allocation.AllocationStatus.ACTIVE
+                ),
+                None,
+            ),
             "payments": payments,
-            "payment_summary": status_row(balance_student),
+            "payment_summary": status_row(student),
         },
     )

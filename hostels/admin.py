@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import Bed, Hostel, Room
 from audit.mixins import AuditedAdminMixin
 from audit.models import AuditEvent
 from audit.services import record_event
-from .models import Hostel, Room, Bed
+
+from .models import Bed, Hostel, Room
 
 
 class RoomInline(admin.TabularInline):
@@ -25,9 +25,7 @@ def save_audited_formset(request, formset):
     instances = formset.save(commit=False)
     for obj in instances:
         action = (
-            AuditEvent.Action.CREATE
-            if obj._state.adding
-            else AuditEvent.Action.UPDATE
+            AuditEvent.Action.CREATE if obj._state.adding else AuditEvent.Action.UPDATE
         )
         obj.save()
         record_event(user=request.user, action=action, record=obj)

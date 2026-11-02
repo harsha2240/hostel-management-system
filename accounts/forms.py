@@ -10,21 +10,21 @@ class AccountCreationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'role')
+        fields = ("username", "first_name", "last_name", "email", "role")
 
     def _post_clean(self):
         super()._post_clean()
-        password = self.cleaned_data.get('password')
+        password = self.cleaned_data.get("password")
         if not password:
             return
         try:
             validate_password(password, self.instance)
         except ValidationError as error:
-            self.add_error('password', error)
+            self.add_error("password", error)
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data['password'])
+        user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
         return user
@@ -33,21 +33,21 @@ class AccountCreationForm(forms.ModelForm):
 class AccountUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'role')
+        fields = ("first_name", "last_name", "email", "role")
 
     def clean_role(self):
-        role = self.cleaned_data['role']
+        role = self.cleaned_data["role"]
         if self.instance.is_superuser and role != User.Role.ADMIN:
-            raise ValidationError('A superuser must retain the Admin role.')
+            raise ValidationError("A superuser must retain the Admin role.")
         return role
 
 
 class ProfileSettingsForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email')
+        fields = ("first_name", "last_name", "email")
         labels = {
-            'first_name': 'First name',
-            'last_name': 'Last name',
-            'email': 'Email address',
+            "first_name": "First name",
+            "last_name": "Last name",
+            "email": "Email address",
         }

@@ -1,8 +1,19 @@
-# Hostel Management System (HMS) — Part-1
+# Hostel Management System (HMS)
 
 Team 3 — Software Engineering Mini Project (PES University)
 
-Part-1 documentation for Team 3. The documents include revision histories showing the contributions made during preparation.
+A Django/MySQL application for student records, hostel inventory, allocations,
+payments, reports and audit logging. The repository also contains the original
+Part 1 requirements, design and test-plan documents, with revision histories.
+
+## Part 3: 2-6 November 2026
+
+The [Part 3 team plan](docs/PART3.md) links the instructor instructions,
+assigned issues, case ownership, report destinations and acceptance checks.
+The [Part 3 milestone](https://github.com/Sreeharsha2240/hostel-management-system/milestone/1)
+contains issues #37-#43 for all three contributors. Test cases and four reports
+are assigned work; final acceptance depends on current execution evidence and
+review. Sprint 3 is conditional on actual development spillover.
 
 ## Team and roles
 
@@ -12,7 +23,7 @@ Part-1 documentation for Team 3. The documents include revision histories showin
 | Chennamraju Vaishnavi | PES1UG24CS129 | QA / Test Lead | C3 Student, C4 Hostel/Room/Bed, test ownership |
 | Devansh Gupta | PES1UG24CS145 | Architecture / Development Lead | C5 Allocation, C6 Payment, C7 Reports, architecture |
 
-## Contents
+## Requirements and design documents
 
 - `SRS_Hostel_Management_System.docx` — Software Requirements Specification
 - `SAD_Hostel_Management_System.docx` — Software Architecture and Design Specification
@@ -68,10 +79,17 @@ python manage.py runserver
 
 The site runs at http://127.0.0.1:8000/ and the Django admin at http://127.0.0.1:8000/admin/. Run the tests with `python manage.py test`. The Sprint 1 test scope and saved CI evidence are described in [`docs/SPRINT1_TESTING.md`](docs/SPRINT1_TESTING.md).
 
-Run `python scripts/run_checks.py` for configuration/migration checks, the full
-suite, branch coverage and saved JUnit/coverage/run evidence. GitHub Actions
+Run `python scripts/run_checks.py` for lint and formatting, dependency consistency,
+configuration, applied and generated migration checks, static-file collection
+validation, the full suite, branch coverage and a separate timing smoke check
+without coverage. It saves JUnit/coverage/run evidence. GitHub Actions
 runs the same checks on Python 3.11/3.14 with MySQL 8.4; see
 [`docs/SPRINT2.md`](docs/SPRINT2.md) for scope, API routes and interpretation.
+
+Run `python -m ruff check .` and `python -m ruff format --check .` for quick
+Python checks. Ruff checks errors, imports, common bug patterns and Python 3.11
+syntax updates. Use `python -m ruff format .` to format code; generated migrations
+are excluded. `.editorconfig` and `.gitattributes` define text-file conventions.
 
 The Sprint 2 allocation and payment workflows, migration notes and API examples
 are documented in [`docs/SPRINT2.md`](docs/SPRINT2.md). Issue acceptance and merge
@@ -96,11 +114,11 @@ remain subject to team review.
    CREATE USER 'hms_user'@'localhost' IDENTIFIED BY 'choose-a-password';
    GRANT ALL PRIVILEGES ON hms.* TO 'hms_user'@'localhost';
    -- Django's test runner creates and drops a separate test_hms database.
-   GRANT ALL PRIVILEGES ON test_hms.* TO 'hms_user'@'localhost';
+   GRANT ALL PRIVILEGES ON `test\_hms`.* TO 'hms_user'@'localhost';
    ```
 
    The application connects only as `hms_user`, which has no rights outside these two databases (SAD 3.9). Do not use the root account in `.env`.
-3. Put the same password in `DB_PASSWORD` in `.env`. Change `DB_NAME`, `DB_HOST` or `DB_PORT` only if your setup differs from the defaults; if you rename the database, grant on `test_<new name>` instead of `test_hms`.
+3. Put the same password in `DB_PASSWORD` in `.env`. Change `DB_NAME`, `DB_HOST` or `DB_PORT` only if your setup differs from the defaults; if you rename the database, grant on `test_<new name>` instead of `test_hms`. Escape underscores and percent signs in database-level grants so they are literal names, not MySQL privilege wildcards.
 4. Run `python manage.py migrate` to create the tables. `python manage.py showmigrations` lists what has been applied.
 
 **Working with migrations.** After changing a model, run `python manage.py makemigrations <app>` and commit the generated file in `<app>/migrations/` together with the model change. Never edit or delete a migration that is already on `main`; add a new one instead.
@@ -113,7 +131,7 @@ leave `DJANGO_SECURE_HSTS_PRELOAD=False` unless the domain is intentionally subm
 browser preload lists. Keep the secure-cookie, redirect and HSTS settings disabled for
 the documented local HTTP development server.
 
-## Team collaboration (HMS-03)
+## Student access and audit
 
 ### Student self-service (HMS-12)
 
@@ -157,6 +175,8 @@ automatically, so operators should schedule the command as a maintenance task.
 
 Run `python manage.py test audit accounts --noinput` for audit, session and
 lockout regression tests on the configured MySQL server.
+
+## Team collaboration (HMS-03)
 
 ### Branches and commits
 

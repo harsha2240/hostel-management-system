@@ -1,0 +1,327 @@
+{
+  "scope": "HMS-18 / issue #40 candidate-build execution; final acceptance requires reviewed cases and the accepted revision",
+  "browser": "Microsoft Edge",
+  "browser_version": "156.0.4314.58",
+  "node_version": "v26.8.1",
+  "playwright_version": "1.64.1",
+  "observations": [
+    {
+      "id": "TC-ALC-01",
+      "status": "PASS",
+      "actual": "Browser form saved allocation/date and displayed confirmation; a separate bed-list page showed Occupied after commit."
+    },
+    {
+      "id": "TC-ALC-02",
+      "status": "PASS",
+      "actual": "A different student using a stale form was rejected with the occupied-bed reason; no duplicate allocation."
+    },
+    {
+      "id": "TC-ALC-03",
+      "status": "PASS",
+      "actual": "Second allocation for the same student was rejected; original ID and bed unchanged."
+    },
+    {
+      "id": "TC-ALC-04",
+      "status": "PASS",
+      "actual": "Browser rejected female student / Boys hostel with a gender mismatch reason; MySQL verifies no write."
+    },
+    {
+      "id": "TC-ALC-05",
+      "status": "PARTIAL",
+      "actual": "Browser transfer preserved original and created successor; injected storage-failure rollback must be verified by the separate regression suite."
+    },
+    {
+      "id": "TC-ALC-06",
+      "status": "PASS",
+      "actual": "Browser release stored vacate date and showed newest-first preserved history; both released beds are checked in MySQL."
+    },
+    {
+      "id": "TC-PAY-01",
+      "status": "PASS",
+      "actual": "Browser recorded INR 5000 UPI payment and downloaded PDF; zero/negative submissions reached server errors without additional receipts."
+    },
+    {
+      "id": "TC-PAY-02",
+      "status": "PASS",
+      "actual": "Browser payment statuses: Pending -> Partial -> Paid; final paid INR 10000, due INR 0 checked in MySQL."
+    },
+    {
+      "id": "TC-RPT-01",
+      "status": "PASS",
+      "actual": "Browser filtered both reports by hostel and used each Download CSV button; Python independently reconciles HTML, CSV and MySQL values."
+    },
+    {
+      "id": "TC-PERF-02",
+      "status": "PASS",
+      "actual": "20 successful real HTTP allocations with durable commits; overlapping client same-bed requests returned one 201 and one 409; MySQL verifies a single winner."
+    }
+  ],
+  "allocation_ids": [
+    2,
+    3
+  ],
+  "receipts": [
+    "R00000000001",
+    "R00000000002"
+  ],
+  "reports": {
+    "occupancy": {
+      "html_rows": [
+        [
+          "Issue40 Boys",
+          "5",
+          "1",
+          "3",
+          "1",
+          "20.00%"
+        ]
+      ],
+      "csv": "\ufeffHostel Name,Total Beds,Occupied Beds,Available Beds,Beds Under Maintenance,Occupancy %,Generated On\r\nIssue40 Boys,5,1,3,1,20.00,02-11-2026 08:57:12 IST\r\n"
+    },
+    "payment": {
+      "html_rows": [
+        [
+          "PES1UG24CS101",
+          "Issue40 Student",
+          "Issue40 Boys",
+          "I402",
+          "10000.00",
+          "10000.00",
+          "0.00",
+          "Paid"
+        ],
+        [
+          "PES1UG24CS104",
+          "Sample Student 104",
+          "Issue40 Boys",
+          "I401",
+          "10000.00",
+          "0.00",
+          "10000.00",
+          "Pending"
+        ]
+      ],
+      "csv": "\ufeffStudent ID,Student Name,Hostel Name,Room,Fee Amount (INR),Amount Paid (INR),Due (INR),Payment Status,Generated On\r\nPES1UG24CS101,Issue40 Student,Issue40 Boys,I402,10000.00,10000.00,0.00,Paid,02-11-2026 08:57:13 IST\r\nPES1UG24CS104,Sample Student 104,Issue40 Boys,I401,10000.00,0.00,10000.00,Pending,02-11-2026 08:57:13 IST\r\n"
+    }
+  },
+  "payment_states": [
+    "Pending",
+    "Partial",
+    "Paid"
+  ],
+  "allocation_timings": [
+    {
+      "allocation_id": 4,
+      "student_id": "PES1UG24CS200",
+      "bed_id": 6,
+      "milliseconds": 34.463800000001356
+    },
+    {
+      "allocation_id": 5,
+      "student_id": "PES1UG24CS201",
+      "bed_id": 7,
+      "milliseconds": 36.344999999999345
+    },
+    {
+      "allocation_id": 6,
+      "student_id": "PES1UG24CS202",
+      "bed_id": 8,
+      "milliseconds": 27.641499999999724
+    },
+    {
+      "allocation_id": 7,
+      "student_id": "PES1UG24CS203",
+      "bed_id": 9,
+      "milliseconds": 30.529599999999846
+    },
+    {
+      "allocation_id": 8,
+      "student_id": "PES1UG24CS204",
+      "bed_id": 10,
+      "milliseconds": 28.70550000000003
+    },
+    {
+      "allocation_id": 9,
+      "student_id": "PES1UG24CS205",
+      "bed_id": 11,
+      "milliseconds": 27.832800000000134
+    },
+    {
+      "allocation_id": 10,
+      "student_id": "PES1UG24CS206",
+      "bed_id": 12,
+      "milliseconds": 32.514900000000125
+    },
+    {
+      "allocation_id": 11,
+      "student_id": "PES1UG24CS207",
+      "bed_id": 13,
+      "milliseconds": 27.646899999999732
+    },
+    {
+      "allocation_id": 12,
+      "student_id": "PES1UG24CS208",
+      "bed_id": 14,
+      "milliseconds": 28.77519999999822
+    },
+    {
+      "allocation_id": 13,
+      "student_id": "PES1UG24CS209",
+      "bed_id": 15,
+      "milliseconds": 27.90229999999974
+    },
+    {
+      "allocation_id": 14,
+      "student_id": "PES1UG24CS210",
+      "bed_id": 16,
+      "milliseconds": 26.933799999998882
+    },
+    {
+      "allocation_id": 15,
+      "student_id": "PES1UG24CS211",
+      "bed_id": 17,
+      "milliseconds": 27.98359999999957
+    },
+    {
+      "allocation_id": 16,
+      "student_id": "PES1UG24CS212",
+      "bed_id": 18,
+      "milliseconds": 28.086300000000847
+    },
+    {
+      "allocation_id": 17,
+      "student_id": "PES1UG24CS213",
+      "bed_id": 19,
+      "milliseconds": 28.576100000000224
+    },
+    {
+      "allocation_id": 18,
+      "student_id": "PES1UG24CS214",
+      "bed_id": 20,
+      "milliseconds": 26.933500000001004
+    },
+    {
+      "allocation_id": 19,
+      "student_id": "PES1UG24CS215",
+      "bed_id": 21,
+      "milliseconds": 29.10190000000148
+    },
+    {
+      "allocation_id": 20,
+      "student_id": "PES1UG24CS216",
+      "bed_id": 22,
+      "milliseconds": 26.564700000000812
+    },
+    {
+      "allocation_id": 21,
+      "student_id": "PES1UG24CS217",
+      "bed_id": 23,
+      "milliseconds": 26.933500000001004
+    },
+    {
+      "allocation_id": 22,
+      "student_id": "PES1UG24CS218",
+      "bed_id": 24,
+      "milliseconds": 25.41229999999996
+    },
+    {
+      "allocation_id": 23,
+      "student_id": "PES1UG24CS219",
+      "bed_id": 25,
+      "milliseconds": 27.15430000000015
+    }
+  ],
+  "concurrency_statuses": [
+    201,
+    409
+  ],
+  "concurrency_requests": [
+    {
+      "student_id": "PES1UG24CS300",
+      "status": 201,
+      "started_ms": 0.08729999999923166,
+      "completed_ms": 31.282499999999345
+    },
+    {
+      "student_id": "PES1UG24CS301",
+      "status": 409,
+      "started_ms": 0.21209999999882712,
+      "completed_ms": 35.42939999999908
+    }
+  ],
+  "concurrency_client_intervals_overlap": true,
+  "allocation_timings_passed": true,
+  "bed_state_snapshots": [
+    {
+      "checkpoint": "after allocation",
+      "states": {
+        "I401-A": "Occupied",
+        "I402-A": "Available"
+      }
+    },
+    {
+      "checkpoint": "after transfer",
+      "states": {
+        "I401-A": "Available",
+        "I402-A": "Occupied"
+      }
+    },
+    {
+      "checkpoint": "after release",
+      "states": {
+        "I401-A": "Available",
+        "I402-A": "Available"
+      }
+    }
+  ],
+  "student_allocation_payment_integration": true,
+  "browser_errors": [],
+  "receipt_pdf": {
+    "sha256": "c98dd1368ab7d825903dfae67c068a6f443a0e15d7866d3022b3060132115453",
+    "verified_fields": [
+      "receipt",
+      "student ID",
+      "student name",
+      "amount",
+      "mode",
+      "reference",
+      "payment date"
+    ]
+  },
+  "database_verification": {
+    "vendor": "mysql",
+    "database": "test_hms",
+    "durable_autocommit": true,
+    "single_conflict_winner": true,
+    "receipt_counter": 2,
+    "invalid_submissions_unchanged": true,
+    "html_csv_and_database_match": true
+  },
+  "source": {
+    "commit": "33491e3aa92f16781f3161733d2daadc510961d6",
+    "git_dirty": true
+  },
+  "environment": {
+    "python": "3.14.7",
+    "django": "5.2.18",
+    "mysql": "8.4.9",
+    "started_at": "2026-11-02T03:27:01.317429+00:00",
+    "completed_at": "2026-11-02T03:27:15.047400+00:00"
+  },
+  "harness_sha256": {
+    "test_issue40_browser.py": "39fc5e3a1025b293ab500294ddab75944a7740d5a176076f57b8ae7811b3d840",
+    "issue40_browser.cjs": "553a8f740a7a00423cd8c99dc79b1a721aa4e207297e0ccd42fe859e21aa22ee",
+    "run_issue40_browser.py": "250dc663c8775450d57fd2b76956f077dcca3a2540af57936e8abccae3e6ee65"
+  },
+  "acceptance_status": {
+    "classification": "candidate checkpoint",
+    "case_review": "pending team review",
+    "build_acceptance": "pending team acceptance",
+    "remaining_owned_cases": [
+      "TC-PERF-01",
+      "TC-PERF-03",
+      "TC-OPS-01"
+    ],
+    "ALC05_rollback": "requires companion injected-failure regression evidence"
+  }
+}

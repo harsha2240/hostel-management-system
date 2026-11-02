@@ -1,8 +1,8 @@
-
 from django import forms
 from django.db.models import Q
 
 from accounts.models import User
+
 from .models import Student
 
 
@@ -19,9 +19,9 @@ class StudentForm(forms.ModelForm):
         self.fields["user"].queryset = accounts.order_by("username")
         self.fields["user"].label = "Linked student login"
         self.fields["user"].required = False
-        self.fields["user"].help_text = (
-            "Only this Student account can view the profile's allocation and payment details."
-        )
+        self.fields[
+            "user"
+        ].help_text = "Only this Student account can view the profile's allocation and payment details."
 
     class Meta:
         model = Student
@@ -46,29 +46,14 @@ class StudentForm(forms.ModelForm):
         }
 
     def clean_student_id(self):
-        student_id = self.cleaned_data["student_id"].strip().upper()
+        student_id = self.cleaned_data["student_id"].upper()
 
-        existing_students = Student.objects.filter(
-            student_id__iexact=student_id
-        )
+        existing_students = Student.objects.filter(student_id__iexact=student_id)
 
         if self.instance.pk:
-            existing_students = existing_students.exclude(
-                pk=self.instance.pk
-            )
+            existing_students = existing_students.exclude(pk=self.instance.pk)
 
         if existing_students.exists():
-            raise forms.ValidationError(
-                "Student ID already registered"
-            )
+            raise forms.ValidationError("Student ID already registered")
 
         return student_id
-
-    def clean_name(self):
-        return self.cleaned_data["name"].strip()
-
-    def clean_mobile(self):
-        return self.cleaned_data["mobile"].strip()
-
-    def clean_guardian_mobile(self):
-        return self.cleaned_data["guardian_mobile"].strip()

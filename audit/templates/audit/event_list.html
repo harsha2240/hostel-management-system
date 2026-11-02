@@ -1,14 +1,49 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block title %}Audit log{% endblock %}
+
 {% block content %}
-<div class="page-heading"><h1>Audit log</h1><span class="muted">{{ page_obj.paginator.count }} events</span></div>
+<div class="page-heading">
+  <h1>Audit log</h1>
+  <span class="muted">{{ page_obj.paginator.count }} events</span>
+</div>
 <form method="get" class="card filters">
-  <div class="form-field"><label for="action">Action</label><select name="action" id="action"><option value="">All actions</option>{% for value, label in actions %}<option value="{{ value }}" {% if action == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <div class="form-field">
+    <label for="action">Action</label>
+    <select name="action" id="action">
+      <option value="">All actions</option>
+      {% for value, label in actions %}
+      <option value="{{ value }}"{% if action == value %} selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
   <button type="submit">Filter</button>
 </form>
-<div class="card table-wrap"><table>
-  <thead><tr><th>Date and time (IST)</th><th>Acting user</th><th>Action</th><th>Record</th></tr></thead>
-  <tbody>{% for event in page_obj %}<tr><td>{{ event.timestamp|date:'d-m-Y H:i:s' }}</td><td>{{ event.user.username|default:'Unauthenticated' }}</td><td>{{ event.get_action_display }}</td><td>{{ event.record_type }}{% if event.record_id %} #{{ event.record_id }}{% endif %}</td></tr>{% empty %}<tr><td colspan="4">No audit events match this filter.</td></tr>{% endfor %}</tbody>
-</table></div>
-{% include 'includes/pagination.html' %}
+<div class="card table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Date and time (IST)</th>
+        <th scope="col">Acting user</th>
+        <th scope="col">Action</th>
+        <th scope="col">Record</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in page_obj %}
+      <tr>
+        <td>{{ event.timestamp|date:"d-m-Y H:i:s" }}</td>
+        <td>{{ event.user.username|default:"Unauthenticated" }}</td>
+        <td>{{ event.get_action_display }}</td>
+        <td>{{ event.record_type }}{% if event.record_id %} #{{ event.record_id }}{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">No audit events match this filter.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "includes/pagination.html" %}
 {% endblock %}

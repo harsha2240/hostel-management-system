@@ -1,8 +1,26 @@
 {% extends "base.html" %}
+
 {% block title %}Payment status{% endblock %}
+
 {% block content %}
-<h1>Payment status</h1><p>{{ student }}</p>
-<section class="card"><dl><dt>Hostel / room</dt><dd>{{ row.hostel|default:"Unassigned" }} / {{ row.room|default:"Unassigned" }}</dd><dt>Fee (INR)</dt><dd>{{ row.fee }}</dd><dt>Paid (INR)</dt><dd>{{ row.paid }}</dd><dt>Due (INR)</dt><dd>{{ row.due }}</dd><dt>Status</dt><dd>{{ row.status }}</dd></dl>
-{% if not row.fee_configured %}<p>A room with a positive fee must be assigned before payment status can be settled.</p>{% endif %}</section>
+<h1>Payment status</h1>
+<p>{{ student }}</p>
+<section class="card">
+  <dl>
+    <dt>Hostel / room</dt>
+    <dd>{{ row.hostel|default:"Unassigned" }} / {{ row.room|default:"Unassigned" }}</dd>
+    <dt>Fee (INR)</dt>
+    <dd>{{ row.fee }}</dd>
+    <dt>Paid (INR)</dt>
+    <dd>{{ row.paid }}</dd>
+    <dt>Due (INR)</dt>
+    <dd>{{ row.due }}</dd>
+    <dt>Status</dt>
+    <dd>{{ row.status }}</dd>
+  </dl>
+  {% if not row.fee_configured %}
+  <p>A room with a positive fee must be assigned before payment status can be settled.</p>
+  {% endif %}
+</section>
 <a href="{% url 'payment-list' %}?q={{ student.student_id|urlencode }}">View payment history</a>
 {% endblock %}

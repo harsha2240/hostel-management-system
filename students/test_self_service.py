@@ -105,13 +105,15 @@ class StudentSelfServiceTests(TestCase):
 
     def test_only_student_role_can_open_self_service_page(self):
         self.client.force_login(self.warden)
-        self.assertEqual(self.client.get(reverse("student-self-service")).status_code, 403)
-
-        admin = User.objects.create_user(
-            username="portal-admin", role=User.Role.ADMIN
+        self.assertEqual(
+            self.client.get(reverse("student-self-service")).status_code, 403
         )
+
+        admin = User.objects.create_user(username="portal-admin", role=User.Role.ADMIN)
         self.client.force_login(admin)
-        self.assertEqual(self.client.get(reverse("student-self-service")).status_code, 403)
+        self.assertEqual(
+            self.client.get(reverse("student-self-service")).status_code, 403
+        )
 
     def test_login_is_required_for_self_service_page(self):
         self.client.logout()

@@ -84,6 +84,9 @@ jobs:
       - name: Check lint, configuration, migrations, tests and branch coverage
         run: python scripts/run_checks.py --output-dir test-results/ci
 
+      - name: Check backup and recovery safety without external operations
+        run: python -m unittest discover -s scripts/part3 -p test_issue40_recovery_safety.py -v
+
       - name: Save test evidence
         if: always()
         uses: actions/upload-artifact@v7.0.2

@@ -32,6 +32,16 @@ def main():
         parser.error(
             "Choose a new empty output directory to preserve previous evidence."
         )
+    ignored = subprocess.run(
+        ["git", "check-ignore", "--quiet", str(output / "private-evidence-check")],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+    )
+    if ignored.returncode != 0:
+        parser.error(
+            "Choose a Git-ignored output directory, for example test-results/issue40-browser/NEW."
+        )
     # Fail before database setup if the optional browser tooling is unavailable.
     subprocess.run(
         ["node", "-e", "require('playwright');"],
@@ -49,6 +59,7 @@ def main():
     django.setup()
     from django.conf import settings
     from django.core.management import call_command
+    from django.db import connection
 
     database = settings.DATABASES["default"]
     if database["ENGINE"] != "django.db.backends.mysql" or database["NAME"] != "hms":
@@ -60,6 +71,18 @@ def main():
         parser.error("A custom test database is configured; refusing to touch it.")
     if database.get("TEST", {}).get("MIRROR"):
         parser.error("A mirrored test database is configured; refusing to touch it.")
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s",
+            ["test_hms"],
+        )
+        existing_test_database = cursor.fetchone()
+    connection.close()
+    if existing_test_database:
+        parser.error(
+            "test_hms already exists; refusing to let Django replace an existing database. "
+            "Identify its owner and preserve/remove it separately before running this harness."
+        )
     output.mkdir(parents=True, exist_ok=True)
     call_command("test", "test_issue40_browser", interactive=False, verbosity=2)
 

@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Issue 40 load and volume" enabled="true">
+      <stringProp name="TestPlan.comments">Synthetic disposable test_hms only. All HTTP samples, including login/setup, remain in overall acceptance. Full 50-user interval starts after the shared barrier; short runs are smoke only.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="Variables" enabled="true">
+        <collectionProp name="Arguments.arguments" />
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath" />
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Issue40 users" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="One measured user session" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">50</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">5</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="Loopback HTTP defaults" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments" />
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(hms.host,127.0.0.1)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(hms.port)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout">15000</stringProp>
+          <stringProp name="HTTPSampler.response_timeout">30000</stringProp>
+          <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+        </ConfigTestElement>
+        <hashTree />
+        <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="Private cookies for each user" enabled="true">
+          <collectionProp name="CookieManager.cookies" />
+          <boolProp name="CookieManager.clearEachIteration">false</boolProp>
+          <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>
+        </CookieManager>
+        <hashTree />
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="setup_login_form" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments" />
+          </elementProp>
+          <stringProp name="HTTPSampler.path">/login/</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Form CSRF token" enabled="true">
+            <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+            <stringProp name="RegexExtractor.refname">csrf</stringProp>
+            <stringProp name="RegexExtractor.regex">name="csrfmiddlewaretoken" value="([^"]+)"</stringProp>
+            <stringProp name="RegexExtractor.template">$1$</stringProp>
+            <stringProp name="RegexExtractor.default">MISSING_CSRF</stringProp>
+            <stringProp name="RegexExtractor.match_number">1</stringProp>
+          </RegexExtractor>
+          <hashTree />
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Login form and CSRF must be valid" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename" />
+            <stringProp name="parameters" />
+            <stringProp name="script">
+if (prev.getResponseCode() != '200' || !prev.getResponseDataAsString().contains('Welcome to HMS') || vars.get('csrf') == 'MISSING_CSRF') {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage('Login form/content or CSRF token missing')
+}
+</stringProp>
+          </JSR223Assertion>
+          <hashTree />
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="measurement_start" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename" />
+          <stringProp name="parameters" />
+          <stringProp name="script">
+import java.util.concurrent.CyclicBarrier
+import java.util.concurrent.TimeUnit
+synchronized (props) {
+    if (props.get('hms.barrier') == null) {
+        props.put('hms.barrier', new CyclicBarrier(50, { props.put('hms.started', System.currentTimeMillis().toString()) } as Runnable))
+    }
+}
+try {
+    props.get('hms.barrier').await(180, TimeUnit.SECONDS)
+    vars.put('phase_started_ms', props.get('hms.started').toString())
+    vars.put('phase_elapsed_ms', '0')
+    SampleResult.setResponseCodeOK()
+    SampleResult.setSuccessful(true)
+} catch (Exception failure) {
+    vars.put('phase_started_ms', '0')
+    vars.put('phase_elapsed_ms', '0')
+    SampleResult.setResponseCode('BARRIER_FAILED')
+    SampleResult.setResponseMessage('50-user start barrier failed: ' + failure.getClass().getSimpleName())
+    SampleResult.setSuccessful(false)
+}
+</stringProp>
+        </JSR223Sampler>
+        <hashTree />
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="load_login" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="username" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                <stringProp name="Argument.name">username</stringProp>
+                <stringProp name="Argument.value">issue40-load-${__threadNum}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="password" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                <stringProp name="Argument.name">password</stringProp>
+                <stringProp name="Argument.value">${__P(hms.password)}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="csrfmiddlewaretoken" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                <stringProp name="Argument.name">csrfmiddlewaretoken</stringProp>
+                <stringProp name="Argument.value">${csrf}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.path">/login/</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Authenticated dashboard must be reached" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="filename" />
+            <stringProp name="parameters" />
+            <stringProp name="script">
+def body = prev.getResponseDataAsString()
+if (prev.getResponseCode() != '200' || !body.contains('Warden workspace') || !body.contains('action="/logout/"') || !body.contains('issue40-load-' + (ctx.getThreadNum() + 1) + ' ')) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage('Authenticated Warden dashboard missing after login (HTTP 200 fallback is failure)')
+}
+</stringProp>
+          </JSR223Assertion>
+          <hashTree />
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="One second user think time per HTTP request" enabled="true">
+            <stringProp name="ConstantTimer.delay">1000</stringProp>
+          </ConstantTimer>
+          <hashTree />
+        </hashTree>
+        <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Full measured interval after 50-user barrier" enabled="true">
+          <stringProp name="WhileController.condition">${__groovy((vars.get('phase_started_ms') ?: '0').toLong() &gt; 0 &amp;&amp; System.currentTimeMillis() - vars.get('phase_started_ms').toLong() &lt; props.get('hms.seconds').toLong() * 1000)}</stringProp>
+        </WhileController>
+        <hashTree>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="One second user think time per HTTP request" enabled="true">
+            <stringProp name="ConstantTimer.delay">1000</stringProp>
+          </ConstantTimer>
+          <hashTree />
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="load_search" enabled="true">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="q" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">q</stringProp>
+                  <stringProp name="Argument.value">${__P(hms.srn)}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.path">/students/</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Authenticated search must return real fixture row" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename" />
+              <stringProp name="parameters" />
+              <stringProp name="script">
+def body = prev.getResponseDataAsString()
+if (prev.getResponseCode() != '200' || !body.contains('&lt;h1&gt;Students&lt;/h1&gt;') || !body.contains('&lt;td&gt;' + props.get('hms.srn') + '&lt;/td&gt;') || !body.contains('action="/logout/"') || !body.contains('issue40-load-' + (ctx.getThreadNum() + 1) + ' ')) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage('Authenticated student search fixture table row missing')
+}
+</stringProp>
+            </JSR223Assertion>
+            <hashTree />
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="load_beds" enabled="true">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="hostel" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">hostel</stringProp>
+                  <stringProp name="Argument.value">${__P(hms.hostel_id)}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+                <elementProp name="status" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                  <stringProp name="Argument.name">status</stringProp>
+                  <stringProp name="Argument.value">Available</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.path">/beds/</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Authenticated available bed page must return real fixture row" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="filename" />
+              <stringProp name="parameters" />
+              <stringProp name="script">
+def body = prev.getResponseDataAsString()
+if (prev.getResponseCode() != '200' || !body.contains('&lt;h1&gt;Bed availability&lt;/h1&gt;') || !body.contains('&lt;td&gt;' + props.get('hms.bed_label') + '&lt;/td&gt;') || !body.contains('&lt;td&gt;' + props.get('hms.hostel_name') + '&lt;/td&gt;') || !body.contains('badge Available') || !body.contains('action="/logout/"') || !body.contains('issue40-load-' + (ctx.getThreadNum() + 1) + ' ')) {
+    AssertionResult.setFailure(true)
+    AssertionResult.setFailureMessage('Authenticated available bed fixture table row missing')
+}
+</stringProp>
+            </JSR223Assertion>
+            <hashTree />
+          </hashTree>
+        </hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="measurement_end" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename" />
+          <stringProp name="parameters" />
+          <stringProp name="script">
+def started = (vars.get('phase_started_ms') ?: '0').toLong()
+def elapsed = started &gt; 0 ? System.currentTimeMillis() - started : 0
+vars.put('phase_elapsed_ms', elapsed.toString())
+if (started &gt; 0 &amp;&amp; elapsed &gt;= props.get('hms.seconds').toLong() * 1000) {
+    SampleResult.setResponseCodeOK()
+    SampleResult.setSuccessful(true)
+} else {
+    SampleResult.setResponseCode('DURATION_FAILED')
+    SampleResult.setResponseMessage('User did not complete the full measured load interval')
+    SampleResult.setSuccessful(false)
+}
+</stringProp>
+        </JSR223Sampler>
+        <hashTree />
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

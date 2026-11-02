@@ -7,6 +7,22 @@ automated evidence. Check the course rubric for required slides, live demo,
 signatures and naming; those requirements cannot be inferred from the source
 repository.
 
+## Part 3: current testing and reports
+
+Follow the [Part 3 team plan](PART3.md) and the instructor PDF linked there.
+Its 2-6 November testing window and the submitted Test Plan govern current
+acceptance; historical test totals and scope exclusions below remain context.
+
+- [x] Published Part 3 issues #37-#43 with original case ownership, initial estimates, dependencies, acceptance criteria and the 6 November milestone date.
+- [x] Added the instructor Part 3 PDF and a team plan defining the Test Case Document and four distinct report destinations under `docs/part3/`.
+- [ ] Update the existing GitHub Project with the Part 3 tasks/estimates/iteration when access is available; the current token lacks `read:project`, so board synchronization remains blocked.
+- [ ] Complete the updated Test Case Document and 36-requirement RTM, preserving all 33 original case IDs and adding sprint regressions (#37).
+- [ ] Complete each member's functional, security, performance/recovery and quality execution with current evidence, defects and retests (#38-#40).
+- [ ] Publish the Unit Test Report (#41), System Validation Report (#38), Code Coverage Report and Branch Coverage Report (#42) under `docs/part3/`, with sanitized durable evidence.
+- [ ] Meet the Test Plan exit criteria and record actual QA/Dev/PO approvals and the project-guide acceptance walkthrough; retain failed/blocked criteria and explicit deviations (#43).
+- [ ] Verify the one-minute Sprint 1 and two-minute Sprint 2 outcome videos from Part 2 are genuinely available, and confirm submission channel, exact cutoff and export requirements (#43).
+- [ ] Publish the final accepted revision and complete the agreed submission; use Sprint 3 only for actual owned development spillover while testing/reporting continue (#43).
+
 ## Planning and team records
 
 - [x] Sprint schedule and estimated backlog are documented in `HMS_Part1_Sprint_Backlog.docx`.

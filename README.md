@@ -6,6 +6,15 @@ A Django/MySQL application for student records, hostel inventory, allocations,
 payments, reports and audit logging. The repository also contains the original
 Part 1 requirements, design and test-plan documents, with revision histories.
 
+## Part 3: 2-6 November 2026
+
+The [Part 3 team plan](docs/PART3.md) links the instructor instructions,
+assigned issues, case ownership, report destinations and acceptance checks.
+The [Part 3 milestone](https://github.com/Sreeharsha2240/hostel-management-system/milestone/1)
+contains issues #37-#43 for all three contributors. Test cases and four reports
+are assigned work; final acceptance depends on current execution evidence and
+review. Sprint 3 is conditional on actual development spillover.
+
 ## Team and roles
 
 | Member | SRN | Team Role | Main Technical Responsibility |

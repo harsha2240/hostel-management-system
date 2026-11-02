@@ -137,8 +137,11 @@ Classify actual unit results; the complete Django suite includes integration,
 concurrency and system tests. Reuse a matching verified run between unit and
 coverage reports, coordinating execution rather than launching competing suites.
 The `.coveragerc` gate is **70% combined statement/branch coverage**; the SRS
-requires at least 70% application-logic coverage. Report statements and branches
-separately with scope/denominators. The Part 3 PDF specifies no separate branch
+requires **unit tests to cover at least 70% of application logic**. Define and
+review the unit-test scope in #41/#42 and measure or separately attribute its
+coverage; record the target as unproven if that evidence is unavailable. The
+mixed-suite percentage alone cannot establish this unit-test target. Report
+statements and branches separately with scope/denominators. The Part 3 PDF specifies no separate branch
 percentage threshold. Coverage alone does not establish RTM/system acceptance.
 
 Download the final revision's Python 3.11/3.14 MySQL CI artifacts before their
@@ -173,8 +176,10 @@ cases executed, all High-priority cases passed, zero critical/high defects open,
 and every RTM requirement covered by a passed case**. Missing access, failed
 thresholds and unexecuted cases remain explicit blockers with owners/next steps.
 Record actual QA/Dev/PO approvals and the guide acceptance walkthrough; an
-unmet criterion means not ready unless an explicit guide-approved deviation is
-recorded. Never infer a pass from an old issue's closed state.
+unmet original criterion means not ready against the submitted Test Plan. Record
+any instructor-approved requirement/criterion change separately with its
+authority, date and rationale, retaining the original outcome. Failed, blocked
+and not-run cases keep their actual statuses. Never infer a pass from an old issue's closed state.
 
 The final coordination task also checks inherited Part 2 obligations: the
 one-minute Sprint 1 and two-minute Sprint 2 outcome videos were not found in
